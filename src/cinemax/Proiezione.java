@@ -66,4 +66,18 @@ public class Proiezione {
     }
     campi.add(corrente.toString());
     return campi;
+
+    public static Proiezione fromCSV(String riga){
+        list<String> campi = splitCSV(riga);
+        return new Proiezione(
+            LocalDateTime.parse(campi.get(0)),
+            campi.get(1),
+            campi.get(2),
+            campi.get(3),
+            Integer.parseInt(campi.get(4)),
+            Integer.parseInt(campi.get(5)),
+            Integer.parseInt(campi.get(6)),
+            Double.parseDouble(campi.get(7))
+        );
+    }
 }
