@@ -1,5 +1,9 @@
 package cinemax;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.time.format.DateTimeFormatter;
+
 import java.time.LocalDateTime;
 
 public class Proiezione {
@@ -12,6 +16,8 @@ public class Proiezione {
     private int durataMinuti;
     private int etaMinima;
     private double prezzoBiglietto;
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Proiezione(LocalDateTime dataOraProiezione, String titoloFilm, String genere, String regista, int anno, int durataMinuti, int etaMinima, double prezzoBiglietto) {
         this.dataOraProiezione = dataOraProiezione;
@@ -49,11 +55,12 @@ public class Proiezione {
     public double getPrezzoBiglietto() {
         return prezzoBiglietto;
     }
+    private static List<String> splitCSV(String riga){
     List<String> campi = new ArrayList<>();
     boolean dentroVirgolette = false;
     StringBuilder corrente = new StringBuilder();
 
-    for(int i = 0; i < riga.length; i++){
+    for(int i = 0; i < riga.length(); i++){
         char c = riga.charAt(i);
         if(c == '"'){
             dentroVirgolette = !dentroVirgolette;
@@ -66,11 +73,12 @@ public class Proiezione {
     }
     campi.add(corrente.toString());
     return campi;
+    }
 
     public static Proiezione fromCSV(String riga){
-        list<String> campi = splitCSV(riga);
+        List<String> campi = splitCSV(riga);
         return new Proiezione(
-            LocalDateTime.parse(campi.get(0)),
+            LocalDateTime.parse(campi.get(0), formatter),
             campi.get(1),
             campi.get(2),
             campi.get(3),
@@ -78,6 +86,18 @@ public class Proiezione {
             Integer.parseInt(campi.get(5)),
             Integer.parseInt(campi.get(6)),
             Double.parseDouble(campi.get(7))
+        );
+    }
+    public String toCSV(){
+        return String.join(",",
+            dataOraProiezione.toString(),
+            titoloFilm,
+            genere,
+            regista,
+            String.valueOf(anno),
+            String.valueOf(durataMinuti),
+            String.valueOf(etaMinima),
+            String.valueOf(prezzoBiglietto)
         );
     }
 }
