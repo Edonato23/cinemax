@@ -32,4 +32,10 @@ public class FileManager {
         Path path = Path.of(dataDirectory, nomeFile);
         Files.write(path, righe);
     }
+
+    public void aggiungiProiezione(String nomeFile, Proiezione nuova) throws IOException{
+        List<Proiezione> proiezioni = caricaProiezioni(nomeFile);
+        proiezioni.add(nuova);
+        salvaProiezioni(nomeFile, proiezioni);
+    }
 }
