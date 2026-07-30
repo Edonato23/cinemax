@@ -1,0 +1,54 @@
+Gestione della persistenza dei dati (FileManager)
+
+Scelte architetturali
+
+    Per gestire il salvataggio e la lettura dei dati abbiamo deciso di usare 
+    un'unica classe, FileManager, che si occupa di tutta la lettura e 
+    scrittura dei file (per ora le proiezioni, in futuro anche utenti e 
+    prenotazioni).
+
+    In questo modo, se in futuro dovessimo cambiare il formato con cui 
+    salviamo i dati, o correggere un errore nel modo in cui leggiamo/scriviamo 
+    i file, dovremmo modificare solo la classe FileManager, senza dover 
+    toccare le altre classi del programma che la usano.
+
+
+Strutture dati utilizzate
+
+    Per rappresentare una singola proiezione abbiamo creato la classe 
+    Proiezione, che raggruppa tutti i suoi dati (data e ora, titolo, genere, 
+    regista, anno, durata, età minima, prezzo) come campi di tipo diverso 
+    (date, numeri, testo), invece di tenerli come semplice testo come sono 
+    scritti nel file CSV.
+
+    Per contenere più proiezioni insieme abbiamo usato una List<Proiezione>, una lista che può contenere 
+    un numero variabile di oggetti Proiezione.
+
+
+Scelte algoritmiche
+
+    Per leggere le righe del file CSV non abbiamo potuto usare semplicemente 
+    il metodo split(","), perché alcuni campi (come il titolo del film) sono 
+    racchiusi tra virgolette e potrebbero contenere una virgola al loro 
+    interno. Usando split(",") in modo diretto, una virgola dentro un titolo 
+    avrebbe spezzato il campo in due pezzi sbagliati, rovinando anche tutti 
+    i campi successivi della riga.
+
+    Per risolvere questo problema abbiamo scritto un metodo (splitCSV) che 
+    scorre la riga carattere per carattere, tenendo traccia di quando ci si 
+    trova dentro una coppia di virgolette. Quando ci si trova dentro le 
+    virgolette, una virgola incontrata non viene considerata un separatore 
+    valido, e viene semplicemente aggiunta al campo che si sta costruendo.
+
+
+Formato dei file e gestione dei path
+
+    I dati vengono salvati in file di testo con estensione .csv, con i 
+    campi di ogni riga separati da una virgola. La prima riga del file 
+    contiene l'intestazione, cioè i nomi delle colonne (data_ora_proiezione, 
+    titolo_film, ecc.), e non un dato vero: per questo motivo viene saltata 
+    durante la lettura.
+
+    Il percorso di ogni file viene costruito unendo il nome della cartella 
+    dati (dataDirectory, es. "data") con il nome del file specifico (es. 
+    "proiezioni.csv"), tramite il metodo Path.of() di Java.
