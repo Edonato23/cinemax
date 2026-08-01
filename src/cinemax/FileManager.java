@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * gestisce la lettura e la scrittura su file dei dati delle proiezioni 
@@ -22,47 +23,66 @@ import java.util.List;
     public FileManager(String dataDirectory){
         this.dataDirectory = dataDirectory;
     }
-    /**
-     * carica tutte le proiezioni salvate nel file indicato 
+
+     /**
+     * Carica dal file indicato una lista di elementi di tipo generico T,
+     * convertendo ogni riga di testo tramite la funzione fornita.
+     *
      * @param nomeFile il nome del file da leggere, all'interno della cartella dati
-     * @return la lista delle proiezioni lette dal file
+     * @param convertitore la funzione che trasforma una riga di testo in un
+     *        oggetto di tipo T (ad esempio Proiezione::fromCSV)
+     * @return la lista degli elementi letti dal file
      * @throws IOException se si verifica un errore durante la lettura del file
      */
-    public List<Proiezione> caricaProiezioni(String nomeFile) throws IOException {
+
+    public <T> List<T> carica(String nomeFile, Function<String, T> convertitore) throws IOException {
         Path path = Path.of(dataDirectory, nomeFile);
         List<String> righe = Files.readAllLines(path);
         righe.remove(0);
-        List<Proiezione> proiezioni = new ArrayList<>();
+        List<T> risultato = new ArrayList<>();
         for(String riga : righe){
-            proiezioni.add(Proiezione.fromCSV(riga));
+        risultato.add(convertitore.apply(riga));
         }
-        return proiezioni;
+        return risultato;
     }
-    /**
-     * salva la lista di proiezioni fornita, sovrascrivendo il file indicato 
+
+        /**
+     * Salva la lista di elementi fornita nel file indicato, sovrascrivendo
+     * il contenuto precedente. Ogni elemento viene trasformato in una riga
+     * di testo usando la funzione passata come parametro.
+     *
      * @param nomeFile il nome del file su cui scrivere, all'interno della cartella dati
-     * @param proiezioni la lista completa delle proiezioni da salvare
+     * @param elementi la lista degli elementi da salvare
+     * @param convertitore la funzione che trasforma un elemento di tipo T in
+     *        una riga di testo da scrivere nel file (ad esempio Proiezione::toCSV)
      * @throws IOException se si verifica un errore durante la scrittura del file
      */
-    public void salvaProiezioni(String nomeFile, List<Proiezione> proiezioni) throws IOException {
-        List<String> righe = new ArrayList<>();
-        for(Proiezione p : proiezioni){
-            righe.add(p.toCSV());
-        }
-        Path path = Path.of(dataDirectory, nomeFile);
-        Files.write(path, righe);
+
+    public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore) throws IOException {
+    List<String> righe = new ArrayList<>();
+    for (T elemento : elementi) {
+        righe.add(convertitore.apply(elemento));
+    }
+    Path path = Path.of(dataDirectory, nomeFile);
+    Files.write(path, righe);
     }
     /**
-     * aggiunge una nuova proiezione al file indicato, mantenendo quelle già 
-     * presenti: carica le proiezioni esistenti, vi aggiunge quella nuova, e 
+     * Aggiunge un nuovo elemento al file indicato, mantenendo quelli già
+     * presenti: carica gli elementi esistenti, vi aggiunge quello nuovo, e
      * salva di nuovo l'intera lista aggiornata nel file.
+     *
      * @param nomeFile il nome del file su cui operare, all'interno della cartella dati
-     * @param nuova la nuova proiezione da aggiungere
+     * @param nuovo l'elemento da aggiungere
+     * @param daCSV la funzione per convertire una riga di testo in un
+     *        oggetto di tipo T (usata per leggere il file)
+     * @param aCSV la funzione per convertire un oggetto di tipo T in una
+     *        riga di testo (usata per scrivere il file)
      * @throws IOException se si verifica un errore durante la lettura o la scrittura del file
      */
-    public void aggiungiProiezione(String nomeFile, Proiezione nuova) throws IOException{
-        List<Proiezione> proiezioni = caricaProiezioni(nomeFile);
-        proiezioni.add(nuova);
-        salvaProiezioni(nomeFile, proiezioni);
+    
+    public <T> void aggiungi(String nomeFile, T nuovo, Function<String, T> daCSV, Function<T, String> aCSV) throws IOException {
+    List<T> elementi = carica(nomeFile, daCSV);
+    elementi.add(nuovo);
+    salva(nomeFile, elementi, aCSV);
     }
 }
