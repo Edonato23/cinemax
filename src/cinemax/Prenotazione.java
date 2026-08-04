@@ -1,4 +1,4 @@
-pubblic class Prenotazione {
+public class Prenotazione {
 
     private int codice;
     private Proiezione proiezione;

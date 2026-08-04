@@ -250,8 +250,6 @@ public class MenuManager {
         return scelta;
     }
 
-    
-
     // #endregion
 
     // #endregion

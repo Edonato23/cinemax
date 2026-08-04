@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -36,13 +37,22 @@ import java.util.function.Function;
      */
 
     public <T> List<T> carica(String nomeFile, Function<String, T> convertitore) throws IOException {
+        Objects.requireNonNull(convertitore, "Il convertitore non può essere vuoto");
+
         Path path = Path.of(dataDirectory, nomeFile);
         List<String> righe = Files.readAllLines(path);
-        righe.remove(0);
+
+        // Controlla che le righe non siano vuote e procedere a rimuovere la riga dell'header
+        if(!righe.isEmpty())
+        {
+            righe.remove(0);
+        }
+
         List<T> risultato = new ArrayList<>();
         for(String riga : righe){
         risultato.add(convertitore.apply(riga));
         }
+
         return risultato;
     }
 
@@ -59,13 +69,18 @@ import java.util.function.Function;
      */
 
     public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore) throws IOException {
-    List<String> righe = new ArrayList<>();
-    for (T elemento : elementi) {
-        righe.add(convertitore.apply(elemento));
+        Objects.requireNonNull(elementi, "La lista degli elementi non può essere nulla");
+        Objects.requireNonNull(convertitore, "Il convertitore non può essere nullo");
+
+        List<String> righe = new ArrayList<>(elementi.size());
+        for (T elemento : elementi) {
+            righe.add(convertitore.apply(elemento));
+        }
+
+        Path path = Path.of(dataDirectory, nomeFile);
+        Files.write(path, righe);
     }
-    Path path = Path.of(dataDirectory, nomeFile);
-    Files.write(path, righe);
-    }
+
     /**
      * Aggiunge un nuovo elemento al file indicato, mantenendo quelli già
      * presenti: carica gli elementi esistenti, vi aggiunge quello nuovo, e
@@ -81,8 +96,8 @@ import java.util.function.Function;
      */
     
     public <T> void aggiungi(String nomeFile, T nuovo, Function<String, T> daCSV, Function<T, String> aCSV) throws IOException {
-    List<T> elementi = carica(nomeFile, daCSV);
-    elementi.add(nuovo);
-    salva(nomeFile, elementi, aCSV);
+        List<T> elementi = carica(nomeFile, daCSV);
+        elementi.add(nuovo);
+        salva(nomeFile, elementi, aCSV);
     }
 }
