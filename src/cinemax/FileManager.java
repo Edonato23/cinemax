@@ -65,39 +65,21 @@ import java.util.function.Function;
      * @param elementi la lista degli elementi da salvare
      * @param convertitore la funzione che trasforma un elemento di tipo T in
      *        una riga di testo da scrivere nel file (ad esempio Proiezione::toCSV)
+     * @param intestazione la riga di intestazione da scrivere come prima riga del file
      * @throws IOException se si verifica un errore durante la scrittura del file
+     * @throws NullPointerException se la lista degli elementi o il convertitore sono nulli
      */
 
-    public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore) throws IOException {
+    public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore, String intestazione) throws IOException {
         Objects.requireNonNull(elementi, "La lista degli elementi non può essere nulla");
         Objects.requireNonNull(convertitore, "Il convertitore non può essere nullo");
-
         List<String> righe = new ArrayList<>(elementi.size());
+        righe.add(intestazione);
         for (T elemento : elementi) {
             righe.add(convertitore.apply(elemento));
         }
 
         Path path = Path.of(dataDirectory, nomeFile);
         Files.write(path, righe);
-    }
-
-    /**
-     * Aggiunge un nuovo elemento al file indicato, mantenendo quelli già
-     * presenti: carica gli elementi esistenti, vi aggiunge quello nuovo, e
-     * salva di nuovo l'intera lista aggiornata nel file.
-     *
-     * @param nomeFile il nome del file su cui operare, all'interno della cartella dati
-     * @param nuovo l'elemento da aggiungere
-     * @param daCSV la funzione per convertire una riga di testo in un
-     *        oggetto di tipo T (usata per leggere il file)
-     * @param aCSV la funzione per convertire un oggetto di tipo T in una
-     *        riga di testo (usata per scrivere il file)
-     * @throws IOException se si verifica un errore durante la lettura o la scrittura del file
-     */
-    
-    public <T> void aggiungi(String nomeFile, T nuovo, Function<String, T> daCSV, Function<T, String> aCSV) throws IOException {
-        List<T> elementi = carica(nomeFile, daCSV);
-        elementi.add(nuovo);
-        salva(nomeFile, elementi, aCSV);
     }
 }
