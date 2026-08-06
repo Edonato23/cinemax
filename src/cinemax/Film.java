@@ -1,3 +1,5 @@
+package cinemax;
+
 public class Film {
     private String titolo;
     private String genere;

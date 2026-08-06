@@ -1,7 +1,9 @@
+package cinemax;
+
 public class Prenotazione {
 
     private int codice;
     private Proiezione proiezione;
-    private Cliente cliente;
+    private Utente utente;
     private int numeroPosti;
 }
