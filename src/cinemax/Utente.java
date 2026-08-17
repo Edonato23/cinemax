@@ -1,6 +1,7 @@
 package cinemax;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 public class Utente {
     public enum Ruolo {
@@ -16,6 +17,7 @@ public class Utente {
     private String domicilio;
     private int ruolo;
     private LocalDate dataNascita;
+    private int idUtente;
 
     // #region Costruttori
 
@@ -34,6 +36,7 @@ public class Utente {
         this.domicilio = domicilio;
         this.ruolo = ruolo;
         this.dataNascita = dataNascita;
+        this.idUtente = 0; // TODO: Assegnare un ID univoco all'utente
     }
 
     // #endregion
@@ -56,6 +59,14 @@ public class Utente {
 
     public Ruolo getRuolo() {
         return Ruolo.values()[this.ruolo];
+    }
+
+    public int getEta() {
+        return Period.between(this.dataNascita, LocalDate.now()).getYears();
+    }
+
+    public int getIdUtente() {
+        return this.idUtente;
     }
 
     // #endregion

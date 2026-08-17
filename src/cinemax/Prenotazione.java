@@ -2,8 +2,8 @@ package cinemax;
 
 public class Prenotazione {
 
-    private int codice;
-    private Proiezione proiezione;
-    private Utente utente;
+    private int idPrenotazione;
+    private int idProiezione;
+    private int idUtente;
     private int numeroPosti;
 }

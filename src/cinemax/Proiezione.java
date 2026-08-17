@@ -16,6 +16,7 @@ public class Proiezione {
     private int durataMinuti;
     private int etaMinima;
     private double prezzoBiglietto;
+    private int idProiezione;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -29,7 +30,7 @@ public class Proiezione {
         this.durataMinuti = durataMinuti;
         this.etaMinima = etaMinima;
         this.prezzoBiglietto = prezzoBiglietto;
-
+        this.idProiezione = 0; // TODO: Assegnare un ID univoco alla proiezione
     }
 
     public LocalDateTime getDataOraProiezione() {
@@ -62,6 +63,17 @@ public class Proiezione {
 
     public double getPrezzoBiglietto() {
         return prezzoBiglietto;
+    }
+
+    // TODO: Spostare eventualmente la logica dei film in una classe a parte
+    public String getInfoFilm()
+    {
+        return String.format("%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d",
+                titoloFilm, anno, genere, regista, durataMinuti, etaMinima);
+    }
+
+    public int getIdProiezione() {
+        return idProiezione;
     }
 
     private static List<String> splitCSV(String riga) {
@@ -97,8 +109,10 @@ public class Proiezione {
                 Double.parseDouble(campi.get(7)));
     }
 
+    // TODO: cambiare carattere separatore
     public String toCSV() {
         return String.join(",",
+                String.valueOf(idProiezione),
                 dataOraProiezione.toString(),
                 titoloFilm,
                 genere,
@@ -107,5 +121,11 @@ public class Proiezione {
                 String.valueOf(durataMinuti),
                 String.valueOf(etaMinima),
                 String.valueOf(prezzoBiglietto));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d. %s - %s - Prezzo: %.2f€",
+                idProiezione, titoloFilm, dataOraProiezione.format(formatter), prezzoBiglietto);
     }
 }
