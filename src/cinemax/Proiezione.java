@@ -16,20 +16,11 @@ public class Proiezione {
     private int durataMinuti;
     private int etaMinima;
     private double prezzoBiglietto;
-
     private int idProiezione;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public Proiezione(
-            LocalDateTime dataOraProiezione, 
-            String titoloFilm, 
-            String genere, 
-            String regista, 
-            int anno,
-            int durataMinuti, 
-            int etaMinima, 
-            double prezzoBiglietto) {
+    public Proiezione(LocalDateTime dataOraProiezione,  String titoloFilm, String genere,  String regista,  int anno, int durataMinuti,  int etaMinima,  double prezzoBiglietto) {
 
         this.dataOraProiezione = dataOraProiezione;
         this.titoloFilm = titoloFilm;
@@ -53,10 +44,6 @@ public class Proiezione {
         this.prezzoBiglietto = altraProiezione.prezzoBiglietto;
         this.idProiezione = altraProiezione.idProiezione;
     }
-
-    // #endregion
-
-    // #region Getter
 
     public LocalDateTime getDataOraProiezione() {
         return this.dataOraProiezione;
@@ -94,7 +81,6 @@ public class Proiezione {
         return this.idProiezione;
     }
 
-    //Assegnazione id 
     void assegnaId(int idProiezione) {
         this.idProiezione = idProiezione;
     }
@@ -133,13 +119,7 @@ public class Proiezione {
 
     public String getInfoFilm() {
         return String.format(
-                "%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d",
-                titoloFilm, 
-                anno, 
-                genere, 
-                regista, 
-                durataMinuti, 
-                etaMinima);
+                "%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d", titoloFilm, anno, genere, regista, durataMinuti, etaMinima);
     }
 
     private static List<String> splitCSV(String riga) {
@@ -164,40 +144,19 @@ public class Proiezione {
 
     public static Proiezione fromCSV(String riga) {
         List<String> campi = splitCSV(riga);
-        Proiezione proiezione = new Proiezione(
-                LocalDateTime.parse(campi.get(1), formatter),
-                campi.get(2),
-                campi.get(3),
-                campi.get(4),
-                Integer.parseInt(campi.get(5)),
-                Integer.parseInt(campi.get(6)),
-                Integer.parseInt(campi.get(7)),
-                Double.parseDouble(campi.get(8)));
-        proiezione.assegnaId(campi.get(0));
+        return new Proiezione( LocalDateTime.parse(campi.get(0), formatter), campi.get(1), campi.get(2), campi.get(3), Integer.parseInt(campi.get(4)), Integer.parseInt(campi.get(5)), Integer.parseInt(campi.get(6)), Double.parseDouble(campi.get(7)));
        
         return proiezione;
 
     }
 
     public String toCSV() {
-        return String.join(",",
-                String.valueOf(idProiezione),
-                dataOraProiezione.toString(),
-                titoloFilm,
-                genere,
-                regista,
-                String.valueOf(anno),
-                String.valueOf(durataMinuti),
-                String.valueOf(etaMinima),
-                String.valueOf(prezzoBiglietto));
+        return String.join(",", String.valueOf(idProiezione), dataOraProiezione.toString(), titoloFilm, genere, regista, String.valueOf(anno), String.valueOf(durataMinuti), String.valueOf(etaMinima), String.valueOf(prezzoBiglietto));
     }
 
     @Override
     public String toString() {
         return String.format(
-                    "%d. %s - %s - Prezzo: %.2f€",
-                     titoloFilm,
-                     dataOraProiezione.format(formatter),
-                     prezzoBiglietto);
+                    "%d. %s - %s - Prezzo: %.2f€", idProiezione, titoloFilm, dataOraProiezione.format(formatter), prezzoBiglietto);
     }
 }
