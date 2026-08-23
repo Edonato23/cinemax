@@ -3,8 +3,8 @@ package cinemax;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
-
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Proiezione {
 
@@ -16,12 +16,21 @@ public class Proiezione {
     private int durataMinuti;
     private int etaMinima;
     private double prezzoBiglietto;
+
     private int idProiezione;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public Proiezione(LocalDateTime dataOraProiezione, String titoloFilm, String genere, String regista, int anno,
-            int durataMinuti, int etaMinima, double prezzoBiglietto) {
+    public Proiezione(
+            LocalDateTime dataOraProiezione, 
+            String titoloFilm, 
+            String genere, 
+            String regista, 
+            int anno,
+            int durataMinuti, 
+            int etaMinima, 
+            double prezzoBiglietto) {
+
         this.dataOraProiezione = dataOraProiezione;
         this.titoloFilm = titoloFilm;
         this.genere = genere;
@@ -30,50 +39,107 @@ public class Proiezione {
         this.durataMinuti = durataMinuti;
         this.etaMinima = etaMinima;
         this.prezzoBiglietto = prezzoBiglietto;
-        this.idProiezione = 0; // TODO: Assegnare un ID univoco alla proiezione
+        this.idProiezione = 0; // L'id viene assegnato da MenuManager
     }
 
+    public Proiezione(Proiezione altraProiezione) {
+        this.dataOraProiezione = altraProiezione.dataOraProiezione;
+        this.titoloFilm = altraProiezione.titoloFilm;
+        this.genere = altraProiezione.genere;
+        this.regista = altraProiezione.regista;
+        this.anno = altraProiezione.anno;
+        this.durataMinuti = altraProiezione.durataMinuti;
+        this.etaMinima = altraProiezione.etaMinima;
+        this.prezzoBiglietto = altraProiezione.prezzoBiglietto;
+        this.idProiezione = altraProiezione.idProiezione;
+    }
+
+    // #endregion
+
+    // #region Getter
+
     public LocalDateTime getDataOraProiezione() {
-        return dataOraProiezione;
+        return this.dataOraProiezione;
     }
 
     public String getTitoloFilm() {
-        return titoloFilm;
+        return this.titoloFilm;
     }
 
     public String getGenere() {
-        return genere;
+        return this.genere;
     }
 
     public String getRegista() {
-        return regista;
+        return this.regista;
     }
 
     public int getAnno() {
-        return anno;
+        return this.anno;
     }
 
     public int getDurataMinuti() {
-        return durataMinuti;
+        return this.durataMinuti;
     }
 
     public int getEtaMinima() {
-        return etaMinima;
+        return this.etaMinima;
     }
 
     public double getPrezzoBiglietto() {
-        return prezzoBiglietto;
-    }
-
-    // TODO: Spostare eventualmente la logica dei film in una classe a parte
-    public String getInfoFilm()
-    {
-        return String.format("%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d",
-                titoloFilm, anno, genere, regista, durataMinuti, etaMinima);
+        return this.prezzoBiglietto;
     }
 
     public int getIdProiezione() {
-        return idProiezione;
+        return this.idProiezione;
+    }
+
+    //Assegnazione id 
+    void assegnaId(int idProiezione) {
+        this.idProiezione = idProiezione;
+    }
+
+    public void setDataOraProiezione(LocalDateTime dataOraProiezione) {
+        this.dataOraProiezione = dataOraProiezione;
+    }
+
+    public void setTitolo(String titoloFilm) {
+        this.titoloFilm = titoloFilm;
+    }
+
+    public void setGenere(String genere){
+        this.genere = genere;
+    }
+
+    publiv void setRegista(String regista) {
+        this.regista = regista;
+    }
+
+    public void setAnno(int anno) {
+        this.anno = anno;
+    }
+
+    public void setDurataMinuti(int durataMinuti) {
+        this.durataMinuti = durataMinuti;
+    }
+
+    pulic void setEtaMinima(int etaMinima) {
+        this.etaMinima = etaMinima;
+    }
+
+    public void setPrezzoBiglietto(double prezzoBiglietto) {
+        this.prezzoBiglietto = prezzoBiglietto;
+    }
+
+    public String getInfoFilm() {
+        return String.format(
+                "%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d",
+                titoloFilm, 
+                anno, 
+                genere, 
+                regista, 
+                durataMinuti, 
+                etaMinima);
     }
 
     private static List<String> splitCSV(String riga) {
@@ -98,18 +164,21 @@ public class Proiezione {
 
     public static Proiezione fromCSV(String riga) {
         List<String> campi = splitCSV(riga);
-        return new Proiezione(
-                LocalDateTime.parse(campi.get(0), formatter),
-                campi.get(1),
+        Proiezione proiezione = new Proiezione(
+                LocalDateTime.parse(campi.get(1), formatter),
                 campi.get(2),
                 campi.get(3),
-                Integer.parseInt(campi.get(4)),
+                campi.get(4),
                 Integer.parseInt(campi.get(5)),
                 Integer.parseInt(campi.get(6)),
-                Double.parseDouble(campi.get(7)));
+                Integer.parseInt(campi.get(7)),
+                Double.parseDouble(campi.get(8)));
+        proiezione.assegnaId(campi.get(0));
+       
+        return proiezione;
+
     }
 
-    // TODO: cambiare carattere separatore
     public String toCSV() {
         return String.join(",",
                 String.valueOf(idProiezione),
@@ -125,7 +194,10 @@ public class Proiezione {
 
     @Override
     public String toString() {
-        return String.format("%d. %s - %s - Prezzo: %.2f€",
-                idProiezione, titoloFilm, dataOraProiezione.format(formatter), prezzoBiglietto);
+        return String.format(
+                    "%d. %s - %s - Prezzo: %.2f€",
+                     titoloFilm,
+                     dataOraProiezione.format(formatter),
+                     prezzoBiglietto);
     }
 }
