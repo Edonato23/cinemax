@@ -2,15 +2,13 @@ package cinemax;
 
 pubblic class Prenotazione {
 
-    private int codice;
-    private Proiezione proiezione;
-    private Cliente cliente;
+    private int idPrenotazione;
+    private int utenteId;
+    private int idProiezione;
     private int numeroPosti;
 
-    public Prenotazione (int idPrenotazione;
-                         int utenteId;
-                         int idProiezione;
-                         int numeroPosti;) {
+    public Prenotazione (int idPrenotazione, int utenteId, int idProiezione, int numeroPosti;) {
+                
                 if (idPrenotazione <= 0) {
                     throw new IllegalArgumentException("Id prenotazione non valido.")
                 }
@@ -71,28 +69,50 @@ pubblic class Prenotazione {
         this.numeroPosti = numeroPosti;
     }
 
-    public static Prenotazione fromCSV() {
-        String[] campi = riga.split(";" , -1);
-        return new Prenotazione(Integer.parseInt(campi[0]),
-                                Integer.parseInt(campi[1]),
-                                Integer.parseInt(campi[2]),
-                                Integer.parseInt(campi[3]),);
+    public static Prenotazione creaPrenotazione(int codice, int utenteId, int idProiezione, int numeroPosti, int postiDisponibili ) {
+        
+        if(numeroPosti <= 0){
+            throw new IllegalArgumentException("Devi prenotare almeno un posto.");
+        }
+
+        if(numeroPosti > postiDisponibili) {
+            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.");
+        }
+        return new Prenotazione (codice, utenteId, idProiezione, numeroPosti);
     }
-    
-    public String toCSV() {
-        return String.join(";", String.valueOf(idPrenotazione),
-                                String.valueOf(utenteId),
-                                String.valueOf(idPrenotazione),
-                                String.valueOf(numeroPosti),);
+
+    public void modificaPrenotazione(int nuovoIdProiezione, int nuovoNumeroPosti, int postiDisponibili) {
+        if(nuovoIdProiezione <=0) {
+            throw new IllegalArgumentException("Id proiezione non valido.");
+        }
+
+        if(nuovoNumeroPosti <=0) {
+            throw ne IllegalArgumentException("Il numero di posti deve essere maggiore di zero.")
+        }
+
+        if(nuovoNumeroPosti > postiDisponibili) {
+            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.")
+        }
+
+        this.idProiezione = nuovoIdProiezione;
+        this.numeroPosti = nuovoNumeroPosti;
+    }
+
+    public void eliminaPrenotazione() {
+        this.numeroPosti = 0;
+    }
+
+    public void visualizzaPrenotazione() {
+        System.out.println("\n=====Prenotazione=====");
+        System.out.println("Codice :" + idPrenotazione);
+        System.out.println("Id cliente:" + utenteId);
+        System.out.println("Id proiezione:" + idProiezione);
+        System.out.println("Numero posti:" + numeroPosti);
+
     }
 
     @Override
     public String toString() {
-        return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d",
-                             idPrenotazione,
-                             utenteId,
-                             idProiezione,
-                             numeroPosti,);
-    
+        return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d", idPrenotazione, utenteId, idProiezione, numeroPosti,);
     }
 }
