@@ -23,8 +23,6 @@ public class Utente {
  
  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern ("dd/MM/yyyy");
 
-    // #region Costruttori
-
     public Utente(
             int idUtente,
             String nome,
@@ -44,10 +42,6 @@ public class Utente {
         this.dataNascita = dataNascita;
         this.ruolo = Ruolo.values()[ruolo];
     }
-
-    // #endregion
-
-    // #region Getter e Setter
 
     public int getIdUtente() {
         return idUtente;
