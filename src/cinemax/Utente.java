@@ -23,15 +23,7 @@ public class Utente {
  
  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern ("dd/MM/yyyy");
 
-    public Utente(
-            int idUtente,
-            String nome,
-            String cognome,
-            String username,
-            String password,
-            String domicilio,
-            String dataNascita
-            int ruolo) {
+    public Utente(int idUtente, String nome, String cognome, String username, String password, String domicilio, String dataNascita, int ruolo) {
         
         this.idUtente = idUtente;
         this.nome = nome;
@@ -121,10 +113,6 @@ public class Utente {
             }
     }
 
-    public boolean verificaPassword (String password) {
-        return this.password.equals(password);
-    }
-
     public boolean isCliente() {
         return this.ruolo == Ruolo.CLIENTE;
     }
@@ -136,41 +124,17 @@ public class Utente {
     public boolean isBigliettaio() {
         return this.ruolo == Ruolo.BIGLIETTAIO;
     }
-
     
-    public static Utente fromCVS(String riga) {
-            String[] campi = riga.split(";", -1);
-
-            return new Utente (
-                    Integer.parseInt(campi[0]),
-                    campi[1],
-                    campi[2],
-                    campi[3],
-                    campi[4],
-                    campi[5],
-                    Integer.parseInt(campi[7]));
+    public boolean verificaPassword (String password) {
+        return this.password != null && this.password.equals(password);
     }
-
-    public String toCVS() {
-        return String.join(";",String.valueOf(idUtente),
-                               nome,
-                               cognome,
-                               username,
-                               password,
-                               domicilio,
-                               dataNascita == null ? "" : dataNascita.toString(),
-                               String.valueOf(ruolo.ordinal())
-        );
+   
+    public static Utente registraCliente( int idUtente, String nome, Striing cognome, String username, String password, String domicilio, String dataNascita,) {
+        return new Utente(idUtente, nome, cognome, username, password, domicilio, dataNascita);
     }
 
     @Override
     public String toString() {
-        return String.format("%d - %s %s - Username: %s - Ruolo: %s", 
-                             idUtente,
-                             nome,
-                             cognome,
-                             username,
-                             ruolo,
-        );
+        return String.format("%d - %s %s - Username: %s - Ruolo: %s", idUtente, nome, cognome, username, ruolo);
     }
 }
