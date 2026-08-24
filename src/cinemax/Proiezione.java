@@ -1,10 +1,7 @@
 package cinemax;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.format.DateTimeParseException;
 
 public class Proiezione {
 
@@ -18,10 +15,11 @@ public class Proiezione {
     private double prezzoBiglietto;
     private int idProiezione;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    // Costruttore con parametri
+    public Proiezione(int idProiezione, LocalDateTime dataOraProiezione, String titoloFilm, String genere, String regista, int anno,
+            int durataMinuti, int etaMinima, double prezzoBiglietto) {
 
-    public Proiezione(LocalDateTime dataOraProiezione,  String titoloFilm, String genere,  String regista,  int anno, int durataMinuti,  int etaMinima,  double prezzoBiglietto) {
-
+        this.idProiezione = idProiezione;
         this.dataOraProiezione = dataOraProiezione;
         this.titoloFilm = titoloFilm;
         this.genere = genere;
@@ -30,10 +28,12 @@ public class Proiezione {
         this.durataMinuti = durataMinuti;
         this.etaMinima = etaMinima;
         this.prezzoBiglietto = prezzoBiglietto;
-        this.idProiezione = 0; // L'id viene assegnato da MenuManager
+        //this.idProiezione = 0; // L'id viene assegnato da MenuManager
     }
 
+    // Costruttore copia
     public Proiezione(Proiezione altraProiezione) {
+        this.idProiezione = altraProiezione.idProiezione;
         this.dataOraProiezione = altraProiezione.dataOraProiezione;
         this.titoloFilm = altraProiezione.titoloFilm;
         this.genere = altraProiezione.genere;
@@ -42,7 +42,6 @@ public class Proiezione {
         this.durataMinuti = altraProiezione.durataMinuti;
         this.etaMinima = altraProiezione.etaMinima;
         this.prezzoBiglietto = altraProiezione.prezzoBiglietto;
-        this.idProiezione = altraProiezione.idProiezione;
     }
 
     public LocalDateTime getDataOraProiezione() {
@@ -93,11 +92,11 @@ public class Proiezione {
         this.titoloFilm = titoloFilm;
     }
 
-    public void setGenere(String genere){
+    public void setGenere(String genere) {
         this.genere = genere;
     }
 
-    publiv void setRegista(String regista) {
+    public void setRegista(String regista) {
         this.regista = regista;
     }
 
@@ -109,7 +108,7 @@ public class Proiezione {
         this.durataMinuti = durataMinuti;
     }
 
-    pulic void setEtaMinima(int etaMinima) {
+    public void setEtaMinima(int etaMinima) {
         this.etaMinima = etaMinima;
     }
 
@@ -119,44 +118,59 @@ public class Proiezione {
 
     public String getInfoFilm() {
         return String.format(
-                "%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d", titoloFilm, anno, genere, regista, durataMinuti, etaMinima);
-    }
-
-    private static List<String> splitCSV(String riga) {
-        List<String> campi = new ArrayList<>();
-        boolean dentroVirgolette = false;
-        StringBuilder corrente = new StringBuilder();
-
-        for (int i = 0; i < riga.length(); i++) {
-            char c = riga.charAt(i);
-            if (c == '"') {
-                dentroVirgolette = !dentroVirgolette;
-            } else if (c == ',' && !dentroVirgolette) {
-                campi.add(corrente.toString());
-                corrente.setLength(0);
-            } else {
-                corrente.append(c);
-            }
-        }
-        campi.add(corrente.toString());
-        return campi;
+                "%s (%d) - %s - Regista: %s - Durata: %d minuti - Età minima: %d", titoloFilm, anno, genere, regista,
+                durataMinuti, etaMinima);
     }
 
     public static Proiezione fromCSV(String riga) {
-        List<String> campi = splitCSV(riga);
-        return new Proiezione( LocalDateTime.parse(campi.get(0), formatter), campi.get(1), campi.get(2), campi.get(3), Integer.parseInt(campi.get(4)), Integer.parseInt(campi.get(5)), Integer.parseInt(campi.get(6)), Double.parseDouble(campi.get(7)));
-       
-        return proiezione;
+        if (riga == null || riga.isBlank()) {
+            throw new IllegalArgumentException("La riga CSV non può essere nulla o vuota.");
+        }
+
+        String[] campi = riga.split(Costanti.SEPARATORE_CSV);
+        if (campi.length != 9) {
+            throw new IllegalArgumentException(
+                    "Riga CSV non valida: attesi 9 campi, trovati " + campi.length + ".");
+        }
+
+        for (int indice = 0; indice < campi.length; indice++) {
+            campi[indice] = campi[indice].trim();
+            if (campi[indice].isEmpty()) {
+                throw new IllegalArgumentException("Il campo " + (indice + 1) + " non può essere vuoto.");
+            }
+        }
+
+        try {
+            int idProiezione = Integer.parseInt(campi[0]);
+            LocalDateTime dataOraProiezione = LocalDateTime.parse(campi[1]);
+            int anno = Integer.parseInt(campi[5]);
+            int durataMinuti = Integer.parseInt(campi[6]);
+            int etaMinima = Integer.parseInt(campi[7]);
+            double prezzoBiglietto = Double.parseDouble(campi[8]);
+
+            return new Proiezione(idProiezione, dataOraProiezione, campi[2], campi[3], campi[4], anno,
+                    durataMinuti, etaMinima, prezzoBiglietto);
+        } catch (NumberFormatException | DateTimeParseException exception) {
+            throw new IllegalArgumentException("Uno o più campi numerici o la data non sono validi.", exception);
+        }
 
     }
 
     public String toCSV() {
-        return String.join(",", String.valueOf(idProiezione), dataOraProiezione.toString(), titoloFilm, genere, regista, String.valueOf(anno), String.valueOf(durataMinuti), String.valueOf(etaMinima), String.valueOf(prezzoBiglietto));
+        return String.join(Costanti.SEPARATORE_CSV, String.valueOf(idProiezione), dataOraProiezione.toString(),
+                titoloFilm, genere, regista, String.valueOf(anno), String.valueOf(durataMinuti),
+                String.valueOf(etaMinima), String.valueOf(prezzoBiglietto));
+    }
+
+    public final String header() {
+        return String.join(Costanti.SEPARATORE_CSV, "idProiezione", "dataOraProiezione", "titoloFilm", "genereFilm",
+                "registaFilm", "annoFilm", "durataMinuti", "etaMinima", "prezzoBiglietto");
     }
 
     @Override
     public String toString() {
         return String.format(
-                    "%d. %s - %s - Prezzo: %.2f€", idProiezione, titoloFilm, dataOraProiezione.format(formatter), prezzoBiglietto);
+                "%d. %s - %s - Prezzo: %.2f€", idProiezione, titoloFilm, dataOraProiezione.format(Costanti.FORMATTATORE_DATA_ORA),
+                prezzoBiglietto);
     }
 }
