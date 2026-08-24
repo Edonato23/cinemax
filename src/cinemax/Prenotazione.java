@@ -1,28 +1,28 @@
 package cinemax;
 
-pubblic class Prenotazione {
+public class Prenotazione {
 
     private int idPrenotazione;
     private int utenteId;
     private int idProiezione;
     private int numeroPosti;
 
-    public Prenotazione (int idPrenotazione, int utenteId, int idProiezione, int numeroPosti;) {
+    public Prenotazione (int idPrenotazione, int utenteId, int idProiezione, int numeroPosti) {
                 
                 if (idPrenotazione <= 0) {
-                    throw new IllegalArgumentException("Id prenotazione non valido.")
+                    throw new IllegalArgumentException("Id prenotazione non valido.");
                 }
 
                 if (utenteId <=0) {
-                    throw new IllegalArgumentException("Id utente non valido.")
+                    throw new IllegalArgumentException("Id utente non valido.");
                 }
 
                 if (idProiezione <=0) {
-                    throw new IllegalArgumentException("Id proiezione non valido.")
+                    throw new IllegalArgumentException("Id proiezione non valido.");
                 }
 
                 if (numeroPosti <=0) {
-                    throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.")
+                    throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.");
                 }
                 this.idPrenotazione = idPrenotazione;
                 this.utenteId = utenteId;
@@ -32,7 +32,7 @@ pubblic class Prenotazione {
 
     public Prenotazione(Prenotazione altraPrenotazione) {
         this.idPrenotazione = altraPrenotazione.idPrenotazione;
-        this.utenteId = altraPrenotazione.untenteId;
+        this.utenteId = altraPrenotazione.utenteId;
         this.idProiezione = altraPrenotazione.idProiezione;
         this.numeroPosti = altraPrenotazione.numeroPosti;
     }
@@ -41,6 +41,10 @@ pubblic class Prenotazione {
         return idPrenotazione;
     }
 
+    public int getId(){
+        return idPrenotazione;
+    }
+    
     public int getUtenteId() {
         return utenteId;
     }
@@ -87,11 +91,11 @@ pubblic class Prenotazione {
         }
 
         if(nuovoNumeroPosti <=0) {
-            throw ne IllegalArgumentException("Il numero di posti deve essere maggiore di zero.")
+            throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.");
         }
 
         if(nuovoNumeroPosti > postiDisponibili) {
-            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.")
+            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.");
         }
 
         this.idProiezione = nuovoIdProiezione;
@@ -113,6 +117,6 @@ pubblic class Prenotazione {
 
     @Override
     public String toString() {
-        return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d", idPrenotazione, utenteId, idProiezione, numeroPosti,);
+        return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d", idPrenotazione, utenteId, idProiezione, numeroPosti);
     }
 }

@@ -31,7 +31,7 @@ public class Utente {
         this.username = username;
         this.password = password;
         this.domicilio = domicilio;
-        this.dataNascita = dataNascita;
+        this.dataNascita = LocalDate.parse(dataNascita, DATE_FORMAT);
         this.ruolo = Ruolo.values()[ruolo];
     }
 
@@ -78,12 +78,12 @@ public class Utente {
     public void setDomicilio (String domicilio) {
         this.domicilio=domicilio;
     }
-
-    public String getDataNascita() {
+ 
+    public LocalDate getDataNascita() {
         return dataNascita;
     }
 
-    public void setDataNascita() {
+    public void setDataNascita(LocalDate dataNascita) {
         this.dataNascita = dataNascita;
     }
 
@@ -101,16 +101,10 @@ public class Utente {
 
     public int getEta() {
 
-            if (dataNascita == null || dataNascita.isBlank()) {
+            if (dataNascita == null) {
                 return 0;
             }
-            try {
-                LocalDate nascita = LocalDate.parse(dataNacita, DATE_FORMAT);
-
-                return Period.between(nascita, LocalDate.now()).getYears();
-            } catch (DateTimeParseException e) {
-                return 0;
-            }
+            return Period.between(dataNascita, LocalDate.now()).getYears();
     }
 
     public boolean isCliente() {
@@ -129,8 +123,8 @@ public class Utente {
         return this.password != null && this.password.equals(password);
     }
    
-    public static Utente registraCliente( int idUtente, String nome, Striing cognome, String username, String password, String domicilio, String dataNascita,) {
-        return new Utente(idUtente, nome, cognome, username, password, domicilio, dataNascita);
+    public static Utente registraCliente( int idUtente, int ruolo, String nome, String cognome, String username, String password, String domicilio, String dataNascita) {
+        return new Utente(idUtente, nome, cognome, username, password, domicilio, dataNascita, ruolo);
     }
 
     @Override
