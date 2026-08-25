@@ -119,4 +119,44 @@ public class Prenotazione {
     public String toString() {
         return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d", idPrenotazione, utenteId, idProiezione, numeroPosti);
     }
+
+    public static Prenotazione fromCSV(String riga) {
+        if (riga == null || riga.isBlank()) {
+            throw new IllegalArgumentException("La riga CSV non può essere nulla o vuota.");
+        }
+
+        String[] campi = riga.split(Costanti.SEPARATORE_CSV);
+        if (campi.length != 4) {
+            throw new IllegalArgumentException(
+                    "Riga CSV non valida: attesi 4 campi, trovati " + campi.length + ".");
+        }
+
+        for (int indice = 0; indice < campi.length; indice++) {
+            campi[indice] = campi[indice].trim();
+            if (campi[indice].isEmpty()) {
+                throw new IllegalArgumentException("Il campo " + (indice + 1) + " non può essere vuoto.");
+            }
+        }
+
+        try {
+            int idPrenotazione = Integer.parseInt(campi[0]);
+            int utenteId = Integer.parseInt(campi[1]);
+            int idProiezione = Integer.parseInt(campi[2]);
+            int numeroPosti = Integer.parseInt(campi[3]);
+
+            return new Prenotazione(idPrenotazione, utenteId, idProiezione, numeroPosti);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("Uno o più campi numerici non sono validi.", exception);
+        }
+    }
+
+    public String toCSV() {
+        return String.join(Costanti.SEPARATORE_CSV, String.valueOf(idPrenotazione), String.valueOf(utenteId),
+                String.valueOf(idProiezione), String.valueOf(numeroPosti));
+    }
+
+    public final static String header() {
+        return String.join(Costanti.SEPARATORE_CSV, "idPrenotazione", "utenteId", "idProiezione", "numeroPosti");
+    }
+    
 }
