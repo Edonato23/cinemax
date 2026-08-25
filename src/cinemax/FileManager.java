@@ -1,12 +1,16 @@
 package cinemax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.time.LocalDateTime;
 
 /**
  * gestisce la lettura e la scrittura su file dei dati delle proiezioni 
@@ -22,6 +26,9 @@ import java.util.function.Function;
  * @param dataDirectory il percorso della cartella contenente i file di dati
  */
     public FileManager(String dataDirectory){
+        if (dataDirectory == null || dataDirectory.isBlank()) {
+            throw new IllegalArgumentException("La cartella dei dati non può essere vuota.");
+        }
         this.dataDirectory = dataDirectory;
     }
 
@@ -37,9 +44,13 @@ import java.util.function.Function;
      */
 
     public <T> List<T> carica(String nomeFile, Function<String, T> convertitore) throws IOException {
+        Objects.requireNonNull(nomeFile, "Il nome del file non può essere nullo");
         Objects.requireNonNull(convertitore, "Il convertitore non può essere vuoto");
 
-        Path path = Path.of(dataDirectory, nomeFile);
+        Path path = pPercorsoFile(nomeFile);
+        if (!Files.isRegularFile(path)) {
+            return new ArrayList<>();
+        }
         List<String> righe = Files.readAllLines(path);
 
         // Controlla che le righe non siano vuote e procedere a rimuovere la riga dell'header
@@ -71,15 +82,53 @@ import java.util.function.Function;
      */
 
     public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore, String intestazione) throws IOException {
+        Objects.requireNonNull(nomeFile, "Il nome del file non può essere nullo");
         Objects.requireNonNull(elementi, "La lista degli elementi non può essere nulla");
         Objects.requireNonNull(convertitore, "Il convertitore non può essere nullo");
+        Objects.requireNonNull(intestazione, "L'intestazione non può essere nulla");
         List<String> righe = new ArrayList<>(elementi.size());
         righe.add(intestazione);
         for (T elemento : elementi) {
             righe.add(convertitore.apply(elemento));
         }
 
-        Path path = Path.of(dataDirectory, nomeFile);
-        Files.write(path, righe);
+        Path path = pPercorsoFile(nomeFile);
+        Files.createDirectories(path.getParent());
+        Files.write(path, righe, StandardCharsets.UTF_8);
+    }
+
+    public void registraErrore(Exception exception) throws IOException {
+        Objects.requireNonNull(exception, "L'eccezione non può essere nulla");
+
+        Path path = pPercorsoFile(Costanti.NOME_FILE_LOG);
+        Files.createDirectories(path.getParent());
+
+        StringWriter stackTrace = new StringWriter();
+        exception.printStackTrace(new PrintWriter(stackTrace));
+
+        StringBuilder record = new StringBuilder();
+        record.append("========================================\n");
+        record.append("Data e ora: ").append(LocalDateTime.now()).append("\n");
+        record.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
+        record.append("Tipo: ").append(exception.getClass().getName()).append("\n");
+        record.append("Messaggio: ").append(exception.getMessage()).append("\n");
+        record.append("Stack trace:\n").append(stackTrace);
+        record.append("========================================\n\n");
+
+        Files.writeString(path, record.toString(),
+                StandardCharsets.UTF_8,
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.APPEND);
+    }
+
+    private Path pPercorsoFile(String nomeFile) {
+        Path path = Path.of(dataDirectory, nomeFile).normalize();
+        Path cartellaDati = Path.of(dataDirectory).toAbsolutePath().normalize();
+
+        if (!path.toAbsolutePath().normalize().startsWith(cartellaDati)) {
+            throw new IllegalArgumentException("Il nome del file non è valido: " + nomeFile);
+        }
+
+        return path;
     }
 }

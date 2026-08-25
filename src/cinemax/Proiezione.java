@@ -80,10 +80,6 @@ public class Proiezione {
         return this.idProiezione;
     }
 
-    void assegnaId(int idProiezione) {
-        this.idProiezione = idProiezione;
-    }
-
     public void setDataOraProiezione(LocalDateTime dataOraProiezione) {
         this.dataOraProiezione = dataOraProiezione;
     }
@@ -142,7 +138,7 @@ public class Proiezione {
 
         try {
             int idProiezione = Integer.parseInt(campi[0]);
-            LocalDateTime dataOraProiezione = LocalDateTime.parse(campi[1]);
+            LocalDateTime dataOraProiezione = LocalDateTime.parse(campi[1], Costanti.FORMATTATORE_DATA_ORA);
             int anno = Integer.parseInt(campi[5]);
             int durataMinuti = Integer.parseInt(campi[6]);
             int etaMinima = Integer.parseInt(campi[7]);
@@ -157,12 +153,12 @@ public class Proiezione {
     }
 
     public String toCSV() {
-        return String.join(Costanti.SEPARATORE_CSV, String.valueOf(idProiezione), dataOraProiezione.toString(),
+        return String.join(Costanti.SEPARATORE_CSV, String.valueOf(idProiezione), dataOraProiezione.format(Costanti.FORMATTATORE_DATA_ORA),
                 titoloFilm, genere, regista, String.valueOf(anno), String.valueOf(durataMinuti),
                 String.valueOf(etaMinima), String.valueOf(prezzoBiglietto));
     }
 
-    public final String header() {
+    public final static String header() {
         return String.join(Costanti.SEPARATORE_CSV, "idProiezione", "dataOraProiezione", "titoloFilm", "genereFilm",
                 "registaFilm", "annoFilm", "durataMinuti", "etaMinima", "prezzoBiglietto");
     }

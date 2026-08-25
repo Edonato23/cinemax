@@ -6,28 +6,29 @@ public class Prenotazione {
     private int utenteId;
     private int idProiezione;
     private int numeroPosti;
+    private Proiezione proiezione;
 
-    public Prenotazione (int idPrenotazione, int utenteId, int idProiezione, int numeroPosti) {
-                
-                if (idPrenotazione <= 0) {
-                    throw new IllegalArgumentException("Id prenotazione non valido.");
-                }
+    public Prenotazione(int idPrenotazione, int utenteId, int idProiezione, int numeroPosti) {
 
-                if (utenteId <=0) {
-                    throw new IllegalArgumentException("Id utente non valido.");
-                }
+        if (idPrenotazione <= 0) {
+            throw new IllegalArgumentException("Id prenotazione non valido.");
+        }
 
-                if (idProiezione <=0) {
-                    throw new IllegalArgumentException("Id proiezione non valido.");
-                }
+        if (utenteId <= 0) {
+            throw new IllegalArgumentException("Id utente non valido.");
+        }
 
-                if (numeroPosti <=0) {
-                    throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.");
-                }
-                this.idPrenotazione = idPrenotazione;
-                this.utenteId = utenteId;
-                this.idProiezione = idProiezione;
-                this.numeroPosti = numeroPosti;
+        if (idProiezione <= 0) {
+            throw new IllegalArgumentException("Id proiezione non valido.");
+        }
+
+        if (numeroPosti <= 0) {
+            throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.");
+        }
+        this.idPrenotazione = idPrenotazione;
+        this.utenteId = utenteId;
+        this.idProiezione = idProiezione;
+        this.numeroPosti = numeroPosti;
     }
 
     public Prenotazione(Prenotazione altraPrenotazione) {
@@ -35,16 +36,17 @@ public class Prenotazione {
         this.utenteId = altraPrenotazione.utenteId;
         this.idProiezione = altraPrenotazione.idProiezione;
         this.numeroPosti = altraPrenotazione.numeroPosti;
+        this.proiezione = altraPrenotazione.proiezione;
     }
 
     public int getIdPrenotazione() {
         return idPrenotazione;
     }
 
-    public int getId(){
+    public int getId() {
         return idPrenotazione;
     }
-    
+
     public int getUtenteId() {
         return utenteId;
     }
@@ -57,67 +59,27 @@ public class Prenotazione {
         return numeroPosti;
     }
 
-
-    public void setProiezione(int idProiezione) {
-        if (idProiezione <=0) {
+    public void setProiezione(Proiezione proiezione) {
+        if (proiezione.getIdProiezione() <= 0) {
             throw new IllegalArgumentException("Id proiezione non valido");
         }
-        this.idProiezione = idProiezione;
+        this.idProiezione = proiezione.getIdProiezione();
+        this.proiezione = proiezione;
     }
 
     public void setNumeroPosti(int numeroPosti) {
-        if (numeroPosti <=0) {
+        if (numeroPosti <= 0) {
             throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero");
 
         }
         this.numeroPosti = numeroPosti;
     }
 
-    public static Prenotazione creaPrenotazione(int codice, int utenteId, int idProiezione, int numeroPosti, int postiDisponibili ) {
-        
-        if(numeroPosti <= 0){
-            throw new IllegalArgumentException("Devi prenotare almeno un posto.");
-        }
-
-        if(numeroPosti > postiDisponibili) {
-            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.");
-        }
-        return new Prenotazione (codice, utenteId, idProiezione, numeroPosti);
-    }
-
-    public void modificaPrenotazione(int nuovoIdProiezione, int nuovoNumeroPosti, int postiDisponibili) {
-        if(nuovoIdProiezione <=0) {
-            throw new IllegalArgumentException("Id proiezione non valido.");
-        }
-
-        if(nuovoNumeroPosti <=0) {
-            throw new IllegalArgumentException("Il numero di posti deve essere maggiore di zero.");
-        }
-
-        if(nuovoNumeroPosti > postiDisponibili) {
-            throw new IllegalArgumentException("Non ci sono abbastanza posti disponibili.");
-        }
-
-        this.idProiezione = nuovoIdProiezione;
-        this.numeroPosti = nuovoNumeroPosti;
-    }
-
-    public void eliminaPrenotazione() {
-        this.numeroPosti = 0;
-    }
-
-    public void visualizzaPrenotazione() {
-        System.out.println("\n=====Prenotazione=====");
-        System.out.println("Codice :" + idPrenotazione);
-        System.out.println("Id cliente:" + utenteId);
-        System.out.println("Id proiezione:" + idProiezione);
-        System.out.println("Numero posti:" + numeroPosti);
-
-    }
-
     @Override
     public String toString() {
-        return String.format("Prenotazione %d - Utente: %d - Proiezione: %d - Posti: %d", idPrenotazione, utenteId, idProiezione, numeroPosti);
+        return String.format("%d %s. Film: %s - Posti: %d - Totale: %.2f", this.idPrenotazione,
+                this.proiezione.getDataOraProiezione().format(Costanti.FORMATTATORE_DATA_ORA),
+                this.proiezione.getTitoloFilm(), this.numeroPosti, this.numeroPosti * this.proiezione.getPrezzoBiglietto());
     }
 
     public static Prenotazione fromCSV(String riga) {
@@ -158,5 +120,5 @@ public class Prenotazione {
     public final static String header() {
         return String.join(Costanti.SEPARATORE_CSV, "idPrenotazione", "utenteId", "idProiezione", "numeroPosti");
     }
-    
+
 }
