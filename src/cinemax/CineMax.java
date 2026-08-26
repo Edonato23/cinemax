@@ -1,6 +1,15 @@
 package cinemax;
 
+/**
+ * Punto di ingresso dell'applicazione Cinemax.
+ */
 public class CineMax {
+    /**
+     * Avvia l'applicazione, inizializza la gestione dei file e apre il menu principale.
+     * Gli errori vengono registrati nel file di log quando possibile.
+     *
+     * @param args argomenti passati da riga di comando
+     */
     public static void main(String[] args) {
         FileManager fileManager = new FileManager(Costanti.PATH_RELATIVO);
 

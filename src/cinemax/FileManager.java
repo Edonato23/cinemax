@@ -13,19 +13,23 @@ import java.util.function.Function;
 import java.time.LocalDateTime;
 
 /**
- * gestisce la lettura e la scrittura su file dei dati delle proiezioni 
- * del cinema, permettendo di caricarle, salvarle e aggiungerne di nuove.
- * @author Edoardo Donato  
+ * Gestisce la lettura, la scrittura e la registrazione degli errori nei file
+ * dell'applicazione Cinemax.
+ *
+ * @author Edoardo Donato
  */
-    public class FileManager {
+public class FileManager {
     
+    /** Percorso della cartella che contiene i file dell'applicazione. */
     private String dataDirectory;
-/**
- * crea un nuovo file manager che opera sulla cartella specificata 
- * 
- * @param dataDirectory il percorso della cartella contenente i file di dati
- */
-    public FileManager(String dataDirectory){
+
+    /**
+     * Crea un file manager che opera sulla cartella specificata.
+     *
+     * @param dataDirectory percorso della cartella contenente i file di dati
+     * @throws IllegalArgumentException se il percorso è nullo o vuoto
+     */
+    public FileManager(String dataDirectory) {
         if (dataDirectory == null || dataDirectory.isBlank()) {
             throw new IllegalArgumentException("La cartella dei dati non può essere vuota.");
         }
@@ -41,6 +45,8 @@ import java.time.LocalDateTime;
      *        oggetto di tipo T (ad esempio Proiezione::fromCSV)
      * @return la lista degli elementi letti dal file
      * @throws IOException se si verifica un errore durante la lettura del file
+    * @throws NullPointerException se il nome del file o il convertitore è nullo
+    * @throws IllegalArgumentException se il nome del file non è valido
      */
 
     public <T> List<T> carica(String nomeFile, Function<String, T> convertitore) throws IOException {
@@ -79,6 +85,7 @@ import java.time.LocalDateTime;
      * @param intestazione la riga di intestazione da scrivere come prima riga del file
      * @throws IOException se si verifica un errore durante la scrittura del file
      * @throws NullPointerException se la lista degli elementi o il convertitore sono nulli
+    * @throws IllegalArgumentException se il nome del file non è valido
      */
 
     public <T> void salva(String nomeFile, List<T> elementi, Function<T, String> convertitore, String intestazione) throws IOException {
@@ -97,6 +104,14 @@ import java.time.LocalDateTime;
         Files.write(path, righe, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Registra nel file di log i dati e lo stack trace di un'eccezione.
+     *
+     * @param exception eccezione da registrare
+     * @throws IOException se si verifica un errore durante la scrittura del log
+     * @throws NullPointerException se l'eccezione è nulla
+     * @throws IllegalArgumentException se il percorso del file di log non è valido
+     */
     public void registraErrore(Exception exception) throws IOException {
         Objects.requireNonNull(exception, "L'eccezione non può essere nulla");
 
@@ -121,6 +136,13 @@ import java.time.LocalDateTime;
                 java.nio.file.StandardOpenOption.APPEND);
     }
 
+    /**
+     * Costruisce e valida il percorso di un file contenuto nella cartella dati.
+     *
+     * @param nomeFile nome del file da risolvere
+     * @return percorso normalizzato del file
+     * @throws IllegalArgumentException se il percorso esce dalla cartella dati
+     */
     private Path pPercorsoFile(String nomeFile) {
         Path path = Path.of(dataDirectory, nomeFile).normalize();
         Path cartellaDati = Path.of(dataDirectory).toAbsolutePath().normalize();
