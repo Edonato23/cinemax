@@ -570,7 +570,7 @@ public class MenuManager {
     private int pLeggiIntero(String istruzioni, int min, int max) {
         while (true) {
 
-            System.out.print(istruzioni);
+            System.out.print(istruzioni + "\n");
             String input = pScanner.nextLine().trim();
 
             try {
@@ -600,7 +600,7 @@ public class MenuManager {
     private double pLeggiDouble(String istruzioni, double min, double max) {
         while (true) {
 
-            System.out.print(istruzioni);
+            System.out.print(istruzioni + "\n");
             String input = pScanner.nextLine().trim();
 
             try {
@@ -628,7 +628,7 @@ public class MenuManager {
     private String pLeggiTesto(String istruzioni) {
         while (true) {
 
-            System.out.print(istruzioni);
+            System.out.print(istruzioni + "\n");
             String input = pScanner.nextLine().trim();
 
             // Controlla che l'input sia valido (non vuoto e non solo spazi bianchi)
@@ -646,7 +646,7 @@ public class MenuManager {
      * @return testo inserito e ripulito dagli spazi iniziali e finali
      */
     private String pLeggiTestoOpzionale(String istruzioni) {
-        System.out.print(istruzioni);
+        System.out.print(istruzioni + "\n");
         return pScanner.nextLine().trim();
     }
 
