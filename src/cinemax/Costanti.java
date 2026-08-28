@@ -34,5 +34,5 @@ public final class Costanti {
     public static final String NOME_FILE_LOG = "errori.txt";
 
     /** Percorso relativo della cartella contenente i dati. */
-    public static final String PATH_RELATIVO = "../../data";
+    public static final String PATH_RELATIVO = "data";
 }
