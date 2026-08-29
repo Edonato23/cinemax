@@ -1,6 +1,7 @@
 package cinemax;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 
 /**
  * Contiene i valori condivisi utilizzati dall'applicazione Cinemax.
@@ -16,10 +17,10 @@ public final class Costanti {
     public static final String SEPARATORE_CSV = "§";
 
     /** Formato utilizzato per date e orari delle proiezioni. */
-    public static final DateTimeFormatter FORMATTATORE_DATA_ORA = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    public static final DateTimeFormatter FORMATTATORE_DATA_ORA = DateTimeFormatter.ofPattern("dd-MM-uuuu HH:mm").withResolverStyle(ResolverStyle.STRICT);
 
     /** Formato utilizzato per le date di nascita. */
-    public static final DateTimeFormatter FORMATTATORE_DATA = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final DateTimeFormatter FORMATTATORE_DATA = DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     /** Nome del file contenente le prenotazioni. */
     public static final String NOME_FILE_PRENOTAZIONI = "prenotazioni.csv";

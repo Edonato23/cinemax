@@ -121,6 +121,8 @@ public class MenuManager {
         boolean continuaModifica = true;
 
         do {
+            System.out.println(prenotazioneModificata.toString());
+
             System.out.println("\nCosa vuoi modificare?");
             System.out.println("1. Proiezione");
             System.out.println("2. Numero di posti");
@@ -131,7 +133,11 @@ public class MenuManager {
 
             switch (scelta) {
                 case 1: {
-                    this.pMostraProiezioni();
+                    if (!this.pMostraProiezioni()) {
+                        System.out.println("Non è possibile modificare la proiezione");
+                        break;
+                    }
+
                     int idNuovaProiezione = this.pLeggiIntero("ID della nuova proiezione: ", 1, Integer.MAX_VALUE);
                     Proiezione nuovaProiezione = this.pCercaProiezione(idNuovaProiezione);
 
@@ -151,8 +157,8 @@ public class MenuManager {
                 }
                 case 2: {
                     int postiDisponibili = 200 - this.pPostiOccupati(proiezioneCorrente.getIdProiezione());
-                    if (prenotazioneModificata.getIdProiezione() == proiezioneCorrente.getIdProiezione()) {
-                        postiDisponibili += prenotazioneModificata.getNumeroPosti();
+                    if (prenotazione.getIdProiezione() == proiezioneCorrente.getIdProiezione()) {
+                        postiDisponibili += prenotazione.getNumeroPosti();
                     }
 
                     if (postiDisponibili <= 0) {
@@ -253,9 +259,9 @@ public class MenuManager {
     /**
      * Verifica se una proiezione si sovrappone a una proiezione esistente.
      *
-     * @param nuovaInizio data e ora di inizio della nuova proiezione
+     * @param nuovaInizio       data e ora di inizio della nuova proiezione
      * @param nuovaDurataMinuti durata della nuova proiezione in minuti
-     * @param sorgente proiezioni con cui effettuare il confronto
+     * @param sorgente          proiezioni con cui effettuare il confronto
      * @return {@code true} se esiste una sovrapposizione, altrimenti {@code false}
      */
     private boolean pHaSovrapposizione(LocalDateTime nuovaInizio, int nuovaDurataMinuti, List<Proiezione> sorgente) {
@@ -292,7 +298,7 @@ public class MenuManager {
         String genere = this.pLeggiTesto("Genere del film: ");
         String regista = this.pLeggiNome("Regista del film: ");
         int anno = this.pLeggiIntero("Anno del film: ", 1800, LocalDate.now().getYear());
-        int etaMinima = this.pLeggiIntero("Età minima per il film: ", 0, 21);
+        int etaMinima = this.pLeggiIntero("Età minima per il film (tra 0 e 21): ", 0, 21);
         double prezzoBiglietto = this.pLeggiDouble("Prezzo del biglietto: ", 0.0, Double.MAX_VALUE);
 
         this.pProiezioni.add(new Proiezione(this.nextProjectonId++, dataOraProiezione, film, genere, regista, anno,
@@ -314,7 +320,13 @@ public class MenuManager {
      * @throws IOException se si verifica un errore durante il salvataggio
      */
     private void pModificaProiezione() throws IOException {
-        this.pMostraProiezioni();
+        List<Proiezione> proiezioniSenzaQuellaModificata;
+
+        if (!this.pMostraProiezioni()) {
+            System.out.println("Non è possibile selezionare la proiezione da modificare");
+            return;
+        }
+
         boolean continuaModifica = true;
 
         int id = this.pLeggiIntero("ID della proiezione da modificare: ", 1, Integer.MAX_VALUE);
@@ -333,6 +345,8 @@ public class MenuManager {
         }
 
         do {
+            System.out.println(proiezioneModificata.toStringLong());
+
             System.out.println("\nCosa vuoi modificare?");
             System.out.println("1. Data e ora della proiezione");
             System.out.println("2. Durata del film");
@@ -351,6 +365,7 @@ public class MenuManager {
                 case 1:
                     // Modifica data e ora della proiezione
                     proiezioneModificata.setDataOraProiezione(this.pLeggiDataFutura());
+
                     break;
                 case 2:
                     // Modifica durata del film
@@ -395,7 +410,7 @@ public class MenuManager {
         } while (continuaModifica);
 
         // Validazione modifiche e salvataggio
-        List<Proiezione> proiezioniSenzaQuellaModificata = this.pProiezioni.stream()
+        proiezioniSenzaQuellaModificata = this.pProiezioni.stream()
                 .filter(it -> it.getIdProiezione() != proiezioneModificata.getIdProiezione())
                 .toList();
 
@@ -403,7 +418,6 @@ public class MenuManager {
                 proiezioneModificata.getDurataMinuti(),
                 proiezioniSenzaQuellaModificata)) {
             System.out.println("Impossibile modificare la proiezione a causa di sovrapposizione.");
-            return;
         }
 
         try {
@@ -437,7 +451,11 @@ public class MenuManager {
      * @throws IOException se si verifica un errore durante il salvataggio
      */
     private void pRimuoviProiezione() throws IOException {
-        this.pMostraProiezioni();
+        if (!this.pMostraProiezioni()) {
+            System.out.println("Non è possibile selezionare la proiezione da rimuovere");
+            return;
+        }
+
         int id = this.pLeggiIntero("ID della proiezione da rimuovere: ", 1, Integer.MAX_VALUE);
         Proiezione proiezione = this.pCercaProiezione(id);
 
@@ -461,7 +479,7 @@ public class MenuManager {
                     this.pProiezioni,
                     Proiezione::toCSV,
                     Proiezione.header());
-            System.out.println("Proiezione eliminata. I posti sono nuovamente disponibili.");
+            System.out.println("Proiezione eliminata.");
         } else {
             System.out.println("Operazione annullata.");
         }
@@ -563,8 +581,8 @@ public class MenuManager {
      * Legge un numero intero compreso nell'intervallo indicato.
      *
      * @param istruzioni messaggio mostrato all'utente
-     * @param min valore minimo incluso
-     * @param max valore massimo incluso
+     * @param min        valore minimo incluso
+     * @param max        valore massimo incluso
      * @return valore intero validato
      */
     private int pLeggiIntero(String istruzioni, int min, int max) {
@@ -593,8 +611,8 @@ public class MenuManager {
      * Legge un numero decimale compreso nell'intervallo indicato.
      *
      * @param istruzioni messaggio mostrato all'utente
-     * @param min valore minimo incluso
-     * @param max valore massimo incluso
+     * @param min        valore minimo incluso
+     * @param max        valore massimo incluso
      * @return valore decimale validato
      */
     private double pLeggiDouble(String istruzioni, double min, double max) {
@@ -685,7 +703,7 @@ public class MenuManager {
      */
     private LocalDateTime pLeggiDataFutura() {
         while (true) {
-            String input = pLeggiTesto("Data e ora (dd/MM/yyyy HH:mm): ");
+            String input = pLeggiTesto("Data e ora (dd-MM-yyyy HH:mm): ");
 
             try {
                 LocalDateTime data = LocalDateTime.parse(input, Costanti.FORMATTATORE_DATA_ORA);
@@ -696,7 +714,7 @@ public class MenuManager {
 
                 return data;
             } catch (DateTimeParseException exception) {
-                System.out.println("Formato non valido. Esempio: 25/12/2026 20:30");
+                System.out.println("Formato non valido. Esempio: 25-12-2026 20:30");
             }
         }
     }
@@ -715,7 +733,7 @@ public class MenuManager {
      * Verifica una password rispetto al suo hash BCrypt.
      *
      * @param password password da verificare
-     * @param hash hash atteso
+     * @param hash     hash atteso
      * @return {@code true} se la password corrisponde all'hash
      */
     private boolean pControllaPassword(String password, String hash) {
@@ -729,8 +747,10 @@ public class MenuManager {
     /**
      * Carica utenti, proiezioni e prenotazioni dai file persistenti.
      *
-     * @throws IOException se si verifica un errore durante la lettura dei file
-     * @throws IllegalStateException se una prenotazione riferisce una proiezione inesistente
+     * @throws IOException           se si verifica un errore durante la lettura dei
+     *                               file
+     * @throws IllegalStateException se una prenotazione riferisce una proiezione
+     *                               inesistente
      */
     private void pCaricaDati() throws IOException {
         this.pUtenti.addAll(this.pFileManager.carica(Costanti.NOME_FILE_UTENTI, Utente::fromCSV));
@@ -901,9 +921,9 @@ public class MenuManager {
         String titolo = this.pLeggiTestoOpzionale("Titolo (anche parziale, invio per saltare): ").toLowerCase();
         String genere = this.pLeggiTestoOpzionale("Genere (invio per saltare): ").toLowerCase();
         String dataInizioStringa = this.pLeggiTestoOpzionale(
-                "Data e ora iniziale (dd/MM/yyyy HH:mm, invio per saltare): ");
+                "Data e ora iniziale (dd-MM-yyyy HH:mm, invio per saltare): ");
         String dataFineStringa = this.pLeggiTestoOpzionale(
-                "Data e ora finale (dd/MM/yyyy HH:mm, invio per saltare): ");
+                "Data e ora finale (dd-MM-yyyy HH:mm, invio per saltare): ");
         String prezzoMinimoStringa = this.pLeggiTestoOpzionale("Prezzo minimo (invio per saltare): ");
         String prezzoMassimoStringa = this.pLeggiTestoOpzionale("Prezzo massimo (invio per saltare): ");
 
@@ -962,6 +982,7 @@ public class MenuManager {
                 .filter(proiezione -> massimoFiltro == null
                         || proiezione.getPrezzoBiglietto() <= massimoFiltro)
                 .sorted(Comparator.comparing(Proiezione::getDataOraProiezione))
+                .sorted(Comparator.comparingInt(Proiezione::getIdProiezione))
                 .toList();
 
         if (risultati.isEmpty()) {
@@ -982,23 +1003,35 @@ public class MenuManager {
      */
     private void pMenuCliente(Utente utente) throws IOException {
         boolean open = true;
-        List<Prenotazione> prenotazioni = this.pCercaPrenotazioniUtente(utente);
 
         while (open) {
+            List<Prenotazione> prenotazioni = this.pCercaPrenotazioniUtente(utente);
+
             System.out.println("\n===== AREA CLIENTE =====");
-            System.out.println("1. Cerca prenotazione");
+            System.out.println("1. Visualizza prenotazione");
             System.out.println("2. Effettua prenotazione");
             System.out.println("3. Modifica prenotazione");
             System.out.println("4. Elimina prenotazione");
             System.out.println("0. Logout");
 
             switch (this.pLeggiIntero("Scelta: ", 0, 4)) {
-                case 1 -> this.pVisualizzaPrenotazione(prenotazioni);
-                case 2 -> this.pCreaPrenotazione(utente.getEta(), utente.getIdUtente());
-                case 3 -> this.pModificaPrenotazione(prenotazioni);
-                case 4 -> this.pEliminaPrenotazione(prenotazioni);
-                case 0 -> open = false;
-                default -> throw new IllegalStateException("Scelta non gestita.");
+                case 1:
+                    this.pVisualizzaPrenotazione(prenotazioni);
+                    break;
+                case 2:
+                    this.pCreaPrenotazione(utente.getEta(), utente.getIdUtente());
+                    break;
+                case 3:
+                    this.pModificaPrenotazione(prenotazioni);
+                    break;
+                case 4:
+                    this.pEliminaPrenotazione(prenotazioni);
+                    break;
+                case 0:
+                    open = false;
+                    break;
+                default:
+                    throw new IllegalStateException("Scelta non gestita.");
             }
         }
     }
@@ -1084,7 +1117,7 @@ public class MenuManager {
     /**
      * Cerca una prenotazione all'interno dell'elenco indicato.
      *
-     * @param id identificativo della prenotazione
+     * @param id           identificativo della prenotazione
      * @param prenotazioni elenco in cui cercare
      * @return prenotazione trovata, oppure {@code null}
      */
@@ -1104,6 +1137,7 @@ public class MenuManager {
     private List<Prenotazione> pCercaPrenotazioniUtente(Utente utente) {
         return this.pPrenotazioni.stream()
                 .filter(prenotazione -> prenotazione.getUtenteId() == utente.getIdUtente())
+                .sorted(Comparator.comparingInt(Prenotazione::getIdPrenotazione))
                 .toList();
     }
 
@@ -1192,15 +1226,15 @@ public class MenuManager {
                 .filter(prenotazione -> {
                     Proiezione proiezione = this.pCercaProiezione(prenotazione.getIdProiezione());
                     return proiezione != null
-                        && (titolo.isBlank()
-                            || proiezione.getTitoloFilm().toLowerCase().contains(titolo));
+                            && (titolo.isBlank()
+                                    || proiezione.getTitoloFilm().toLowerCase().contains(titolo));
                 })
                 .filter(prenotazione -> inizioFiltro == null
-                    || !this.pCercaProiezione(prenotazione.getIdProiezione()).getDataOraProiezione()
-                        .isBefore(inizioFiltro))
+                        || !this.pCercaProiezione(prenotazione.getIdProiezione()).getDataOraProiezione()
+                                .isBefore(inizioFiltro))
                 .filter(prenotazione -> fineFiltro == null
-                    || !this.pCercaProiezione(prenotazione.getIdProiezione()).getDataOraProiezione()
-                        .isAfter(fineFiltro))
+                        || !this.pCercaProiezione(prenotazione.getIdProiezione()).getDataOraProiezione()
+                                .isAfter(fineFiltro))
                 .sorted(Comparator.comparingInt(Prenotazione::getIdPrenotazione))
                 .toList();
 
@@ -1217,22 +1251,25 @@ public class MenuManager {
     // #region Visualizzazione
 
     /** Visualizza tutte le proiezioni future ordinate per data. */
-    private void pMostraProiezioni() {
+    private boolean pMostraProiezioni() {
         System.out.println("\n===== PROIEZIONI DISPONIBILI =====");
         List<Proiezione> proiezioniFuture = this.pProiezioni.stream()
                 .filter(it -> it.getDataOraProiezione().isAfter(LocalDateTime.now()))
                 .sorted(Comparator.comparing(Proiezione::getDataOraProiezione))
+                .sorted(Comparator.comparingInt(Proiezione::getIdProiezione))
                 .toList();
 
         if (proiezioniFuture.isEmpty()) {
             System.out.println("Non ci sono proiezioni disponibili.");
-            return;
+            return false;
         }
 
         proiezioniFuture.forEach(proiezione -> {
             System.out.println(proiezione.toString());
             System.out.println("---------------------");
         });
+
+        return true;
     }
 
     /** Visualizza i dettagli di una proiezione scelta dall'utente. */
@@ -1249,8 +1286,7 @@ public class MenuManager {
             return;
         }
 
-        System.out.println("\n" + proiezione.toString());
-        System.out.println("Film: " + proiezione.getInfoFilm());
+        System.out.println("\n" + proiezione.toStringLong());
         System.out.println("Posti disponibili: " + (200 - this.pPostiOccupati(id)) + "\n");
     }
 
@@ -1262,13 +1298,12 @@ public class MenuManager {
      * Crea una prenotazione per l'utente indicato.
      *
      * @param eta età dell'utente
-     * @param id identificativo dell'utente
+     * @param id  identificativo dell'utente
      * @throws IOException se si verifica un errore durante il salvataggio
      */
     private void pCreaPrenotazione(int eta, int id) throws IOException {
-        this.pMostraProiezioni();
 
-        if (this.pProiezioni.isEmpty()) {
+        if (!this.pMostraProiezioni()) {
             System.out.println("Non è possibile effettuare una prenotazione al momento");
             return;
         }
@@ -1299,7 +1334,7 @@ public class MenuManager {
                 String codiceUnivoco = this.pGeneraCodiceUnivoco(id, proiezione);
                 Prenotazione prenotazione = new Prenotazione(this.nextReservationId++, id,
                         proiezione.getIdProiezione(),
-                    postiDaPrenotare, codiceUnivoco);
+                        postiDaPrenotare, codiceUnivoco);
                 prenotazione.setProiezione(proiezione);
                 this.pPrenotazioni.add(prenotazione);
 
@@ -1312,8 +1347,10 @@ public class MenuManager {
 
                 System.out.println("Prenotazione effettuata con successo!");
                 System.out
-                        .println("Totale prenotazione: " + (proiezione.getPrezzoBiglietto() * postiDaPrenotare) + "€");
+                        .println("Totale prenotazione: " + (proiezione.getPrezzoBiglietto() * postiDaPrenotare)
+                                + " euro");
                 System.out.println(prenotazione);
+
             } catch (IllegalArgumentException exception) {
                 System.out.println("Prenotazione non effettuata: " + exception.getMessage());
             }
@@ -1329,7 +1366,7 @@ public class MenuManager {
     /**
      * Genera un codice univoco breve per una prenotazione.
      *
-     * @param idUtente identificativo dell'utente
+     * @param idUtente   identificativo dell'utente
      * @param proiezione proiezione prenotata
      * @return codice esadecimale di otto caratteri
      * @throws IllegalStateException se l'algoritmo SHA-256 non è disponibile

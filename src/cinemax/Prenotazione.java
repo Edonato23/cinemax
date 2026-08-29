@@ -155,9 +155,9 @@ public class Prenotazione {
      */
     @Override
     public String toString() {
-        return String.format("%d %s %s. Film: %s - Posti: %d - Totale: %.2f", this.idPrenotazione, this.codiceUnivoco,
+        return String.format("%d %s %s. Film: %s (%d) - Posti: %d - Totale: %.2f", this.idPrenotazione, this.codiceUnivoco,
                 this.proiezione.getDataOraProiezione().format(Costanti.FORMATTATORE_DATA_ORA),
-                this.proiezione.getTitoloFilm(), this.numeroPosti,
+                this.proiezione.getTitoloFilm(), this.proiezione.getAnno(), this.numeroPosti,
                 this.numeroPosti * this.proiezione.getPrezzoBiglietto());
     }
 
