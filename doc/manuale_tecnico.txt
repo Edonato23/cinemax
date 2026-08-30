@@ -1,3 +1,37 @@
+Università degli Studi dell'Insubria
+Dipartimento di Scienze Teoriche e Applicate
+
+CineMax
+Manuale Tecnico
+
+Autori:
+Donato Edoardo, 767352, VA
+Gentile Giorgio, 759951, VA
+Fejzaj Cristina, 761382, VA
+
+Versione documento: 1.0
+Data: 28/08/2026
+
+---
+
+Indice
+
+1. Struttura dell'applicazione
+2. Scelte architetturali
+3. Scelte algoritmiche
+4. Formato dei file e loro gestione
+5. Strutture dati utilizzate
+6. Gestione degli utenti
+7. Gestione delle proiezioni
+8. Gestione delle prenotazioni
+9. Gestione degli errori e validazione degli input
+10. Pattern e principi utilizzati
+11. JavaDoc e commenti
+12. Installazione ed esecuzione
+13. Limiti della soluzione sviluppata
+14. Sitografia / Bibliografia
+
+---
 
 1. Struttura dell’applicazione
 Il progetto CineMax è stato sviluppato in Java ed è organizzato in diverse classi, ognuna con un compito specifico.
@@ -13,30 +47,14 @@ Le classi sono inserite nel package cinemax.
 
 2.Scelte architetturali
 
-    Per gestire il salvataggio e la lettura dei dati abbiamo deciso di usare 
-    un'unica classe, FileManager, che si occupa di tutta la lettura e 
-    scrittura dei file (per ora le proiezioni, in futuro anche utenti e 
-    prenotazioni).
-    In questo modo, se in futuro dovessimo cambiare il formato con cui 
-    salviamo i dati, o correggere un errore nel modo in cui leggiamo/scriviamo 
-    i file, dovremmo modificare solo la classe FileManager, senza dover 
-    toccare le altre classi del programma che la usano.
-Per organizzare il progetto abbiamo cercato di separare le responsabilità tra le diverse classi.
-MenuManager gestisce principalmente l’interazione con l’utente e le operazioni del sistema, mentre le classi Utente, Proiezione e Prenotazione rappresentano i dati principali dell’applicazione.
-Per la gestione dei dati abbiamo utilizzato liste (ArrayList) e un FileManager separato, in modo da non mettere direttamente le operazioni sui file all’interno delle classi che rappresentano i dati.
-Un’altra scelta importante è stata utilizzare degli ID numerici per identificare in modo univoco utenti, proiezioni e prenotazioni.
-
-3.Strutture dati utilizzate
-
-    Per rappresentare una singola proiezione abbiamo creato la classe 
-    Proiezione, che raggruppa tutti i suoi dati (data e ora, titolo, genere, 
-    regista, anno, durata, età minima, prezzo) come campi di tipo diverso 
-    (date, numeri, testo), invece di tenerli come semplice testo come sono 
-    scritti nel file CSV.
-
-    Per contenere più proiezioni insieme abbiamo usato una List<Proiezione>, una lista che può contenere 
-    un numero variabile di oggetti Proiezione.
-
+    Per organizzare il progetto abbiamo cercato di separare le responsabilità tra le diverse classi.
+    MenuManager gestisce principalmente l’interazione con l’utente e le operazioni del sistema, mentre le classi Utente, Proiezione e Prenotazione rappresentano i dati principali dell’applicazione.
+    Per la gestione dei dati abbiamo utilizzato liste (ArrayList) e un FileManager separato, in modo da non mettere direttamente le operazioni sui file all’interno delle classi che rappresentano i dati.
+    Un’altra scelta importante è stata utilizzare degli ID numerici per identificare in modo univoco utenti, proiezioni e prenotazioni.
+    Il FileManager è stato progettato in forma generica, utilizzando i generics di Java (<T>) e le interfacce funzionali (Function<>). Invece di avere un metodo dedicato per ogni tipo di dato 
+    (ad esempio caricaProiezioni, caricaUtenti, caricaPrenotazioni), sono stati definiti due soli metodi, carica() e salva(), che funzionano con qualsiasi tipo di oggetto, a patto che venga fornita
+    la funzione di conversione da e verso il formato CSV (ad esempio Proiezione::fromCSV e Proiezione::toCSV). Questa scelta evita di duplicare codice simile per ogni entità del progetto e rende il FileManager 
+    riutilizzabile anche per le entità aggiunte successivamente (Utente, Prenotazione).
 
 3.Scelte algoritmiche
 
@@ -69,47 +87,64 @@ Per la gestione dei posti viene calcolato il numero di posti già occupati somma
 Per le password è stato utilizzato BCrypt, in modo da non salvarle direttamente in chiaro nei file.
 
 
-5. Formato dei file e loro gestione
-I dati del programma vengono salvati in file CSV nella cartella data.
-La gestione dei file è affidata alla classe FileManager, mentre ogni classe che rappresenta un dato fornisce i metodi necessari per convertire i propri oggetti nel formato CSV.
-Come separatore dei campi è stato scelto il carattere §, definito nella classe Costanti:
-public static final String SEPARATORE_CSV = "§";
-La classe Proiezione, ad esempio, utilizza il metodo toCSV() per trasformare un oggetto in una riga del file:
-return String.join(Costanti.SEPARATORE_CSV,
-        String.valueOf(idProiezione),
-        dataOraProiezione.toString(),
-        titoloFilm,
-        genere,
-        regista,
-        String.valueOf(anno),
-        String.valueOf(durataMinuti),
-        String.valueOf(etaMinima),
-        String.valueOf(prezzoBiglietto));
-Per effettuare l’operazione inversa viene utilizzato il metodo fromCSV(), che legge una riga e ricostruisce un oggetto Proiezione.
-I file utilizzati dal programma sono principalmente:
-utenti.csv, per gli utenti;
-proiezioni.csv, per le proiezioni;
-prenotazioni.csv, per le prenotazioni.
-Il FileManager viene inizializzato con il percorso:
-this.pFileManager = new FileManager("../../data");
-All’avvio del programma il metodo pCaricaDati() carica i dati presenti nei file e li inserisce nelle rispettive liste.
-Quando vengono effettuate modifiche, come una nuova prenotazione o una modifica di una proiezione, i dati vengono nuovamente salvati nei file.
+4. Formato dei file e loro gestione
 
+    I dati del programma vengono salvati in file CSV nella cartella data.
+    La gestione dei file è affidata alla classe FileManager, mentre ogni classe che rappresenta un dato fornisce i metodi necessari per convertire i propri oggetti nel formato CSV.
+    Come separatore dei campi è stato scelto il carattere §, definito nella classe Costanti:
+    public static final String SEPARATORE_CSV = "§";
+    La classe Proiezione, ad esempio, utilizza il metodo toCSV() per trasformare un oggetto in una riga del file:
+    return String.join(Costanti.SEPARATORE_CSV,
+            String.valueOf(idProiezione),
+            dataOraProiezione.toString(),
+            titoloFilm,
+            genere,
+            regista,
+            String.valueOf(anno),
+            String.valueOf(durataMinuti),
+            String.valueOf(etaMinima),
+            String.valueOf(prezzoBiglietto));
+    Per effettuare l’operazione inversa viene utilizzato il metodo fromCSV(), che legge una riga e ricostruisce un oggetto Proiezione.
+    I file utilizzati dal programma sono principalmente:
+    utenti.csv, per gli utenti;
+    proiezioni.csv, per le proiezioni;
+    prenotazioni.csv, per le prenotazioni.
+    Il FileManager viene inizializzato con il percorso:
+    this.pFileManager = new FileManager("../../data");
 
+     Il percorso di ogni file viene costruito unendo il nome della cartella 
+    dati (dataDirectory, es. "data") con il nome del file specifico (es. 
+    "proiezioni.csv"), tramite il metodo Path.of() di Java.
+
+    All’avvio del programma il metodo pCaricaDati() carica i dati presenti nei file e li inserisce nelle rispettive liste.
+    Quando vengono effettuate modifiche, come una nuova prenotazione o una modifica di una proiezione, i dati vengono nuovamente salvati nei file.
+
+5.Strutture dati utilizzate
+
+    Per rappresentare una singola proiezione abbiamo creato la classe 
+    Proiezione, che raggruppa tutti i suoi dati (data e ora, titolo, genere, 
+    regista, anno, durata, età minima, prezzo) come campi di tipo diverso 
+    (date, numeri, testo), invece di tenerli come semplice testo come sono 
+    scritti nel file CSV.
+
+    Per contenere più proiezioni insieme abbiamo usato una List<Proiezione>, una lista che può contenere 
+    un numero variabile di oggetti Proiezione.
 
 6. Gestione degli utenti
-La classe Utente contiene i dati personali dell’utente, le credenziali e il ruolo.
-Sono previsti tre ruoli:
-public enum Ruolo {
-    CLIENTE,
-    PROIEZIONISTA,
-    BIGLIETTAIO
-}
-Il ruolo permette di mostrare menu differenti in base al tipo di utente che effettua il login.
-La classe contiene anche il metodo verificaPassword() e nel MenuManager viene utilizzato BCrypt per confrontare la password inserita con quella salvata.
+
+    La classe Utente contiene i dati personali dell’utente, le credenziali e il ruolo.
+    Sono previsti tre ruoli:
+    public enum Ruolo {
+        CLIENTE,
+        PROIEZIONISTA,
+        BIGLIETTAIO
+    }
+    Il ruolo permette di mostrare menu differenti in base al tipo di utente che effettua il login.
+    La classe contiene anche il metodo verificaPassword() e nel MenuManager viene utilizzato BCrypt per confrontare la password inserita con quella salvata.
 
 
 7. Gestione delle proiezioni
+
 La classe Proiezione contiene le informazioni relative alla proiezione, tra cui:
 ID della proiezione;
 data e ora;
@@ -137,34 +172,71 @@ L’ID viene mantenuto all’interno dell’oggetto tramite idProiezione e viene
 
 
 8. Gestione delle prenotazioni
-Le prenotazioni collegano un utente a una proiezione e contengono il numero di posti prenotati.
-Quando viene effettuata una prenotazione, il programma controlla:
-che la proiezione esista;
-che la proiezione sia futura;
-che l’età dell’utente sia sufficiente;
-che ci siano abbastanza posti disponibili.
-Il numero di posti disponibili viene calcolato sottraendo alla capienza massima di 200 posti il numero di posti già prenotati per quella proiezione.
+
+    Le prenotazioni collegano un utente a una proiezione e contengono il numero di posti prenotati.
+    Quando viene effettuata una prenotazione, il programma controlla:
+    che la proiezione esista;
+    che la proiezione sia futura;
+    che l’età dell’utente sia sufficiente;
+    che ci siano abbastanza posti disponibili.
+    Il numero di posti disponibili viene calcolato sottraendo alla capienza massima di 200 posti il numero di posti già prenotati per quella proiezione.
 
 
 9. Gestione degli errori e validazione degli input
-Per evitare inserimenti non validi sono stati creati alcuni metodi dedicati alla lettura degli input, come pLeggiIntero(), pLeggiDouble() e pLeggiTesto().
-Questi metodi controllano che l’utente inserisca valori corretti e, quando necessario, che siano compresi in un determinato intervallo.
-Per le date viene utilizzato LocalDate o LocalDateTime insieme a DateTimeFormatter. In caso di formato non valido viene gestita la DateTimeParseException.
-Durante il caricamento dei file CSV vengono inoltre controllati il numero dei campi e la validità dei dati.
+
+    Per evitare inserimenti non validi sono stati creati alcuni metodi dedicati alla lettura degli input, come pLeggiIntero(), pLeggiDouble() e pLeggiTesto().
+    Questi metodi controllano che l’utente inserisca valori corretti e, quando necessario, che siano compresi in un determinato intervallo.
+    Per le date viene utilizzato LocalDate o LocalDateTime insieme a DateTimeFormatter. In caso di formato non valido viene gestita la DateTimeParseException.
+    Durante il caricamento dei file CSV vengono inoltre controllati il numero dei campi e la validità dei dati.
 
 
 10. Pattern e principi utilizzati
-Nel progetto non è stato implementato un design pattern complesso in modo esplicito, ma sono stati utilizzati alcuni principi di organizzazione del codice.
-In particolare, la classe FileManager separa la gestione dei file dalla logica principale del programma. Inoltre, la classe Costanti raccoglie valori comuni utilizzati in più classi, evitando di ripetere gli stessi valori nel codice.
-È stato utilizzato anche il costruttore di copia nella classe Proiezione, utile per creare una copia dell’oggetto prima di modificarlo.
+
+    Nel progetto è stato utilizzato in modo implicito un pattern simile allo Strategy pattern nella classe FileManager, dove il comportamento di conversione (da e verso CSV)
+    viene passato come parametro sotto forma di funzione, invece di essere scritto fisso all'interno della classe. Oltre a questo, sono stati seguiti alcuni principi di organizzazione
+    del codice.
 
 
 11. JavaDoc e commenti
-Il codice contiene commenti nei punti in cui è necessario spiegare il funzionamento di alcune parti.
-La JavaDoc può essere utilizzata per documentare le classi e i metodi principali, indicando in modo sintetico il loro scopo e, quando necessario, i parametri e il valore restituito.
-L’obiettivo è rendere il codice più comprensibile anche a una persona che non lo ha sviluppato direttamente.
 
+    Il codice è stato documentato utilizzando la JavaDoc, per rendere esplicito lo scopo di classi, metodi e parametri anche a chi non ha sviluppato direttamente quella parte del codice.
+    Ogni metodo pubblico riporta una descrizione del proprio funzionamento, l'elenco dei parametri (tag @param), il valore restituito (tag @return) e le eccezioni sollevate (tag @throws),quando presenti.
 
-    Il percorso di ogni file viene costruito unendo il nome della cartella 
-    dati (dataDirectory, es. "data") con il nome del file specifico (es. 
-    "proiezioni.csv"), tramite il metodo Path.of() di Java.
+    L'obiettivo è rendere il codice più comprensibile anche a una persona che non lo ha sviluppato direttamente.
+
+12. Installazione ed esecuzione
+
+    Requisiti: Java Development Kit (JDK) versione 25 o superiore.
+
+    Il progetto utilizza la libreria esterna jbcrypt (jbcrypt-0.4.jar), inclusa nella cartella lib/ del repository.
+
+    Compilazione (dalla cartella radice del progetto):
+
+    javac -cp lib/jbcrypt-0.4.jar -d bin src/cinemax/*.java
+
+    Esecuzione:
+
+    java -cp "bin;lib/jbcrypt-0.4.jar" cinemax.CineMax
+
+    Il progetto è organizzato secondo la seguente struttura di cartelle, come da specifiche di consegna:
+    - src/: codice sorgente
+    - bin/: file eseguibile (.jar)
+    - data/: file di dati (utenti.csv, proiezioni.csv, prenotazioni.csv)
+    - lib/: librerie esterne (jbcrypt)
+    - doc/: manuale utente, manuale tecnico, javadoc generata
+
+13. Limiti della soluzione sviluppata
+
+- Interfaccia a riga di comando (CLI), senza GUI.
+- Gestione di una singola sala cinematografica con capienza fissa di 200 posti; non è prevista la gestione di più sale o cinema multipli.
+- Persistenza dei dati su file CSV anziché su database relazionale: non è garantita la consistenza in caso di accessi concorrenti da più istanze del programma sugli stessi file.
+- Separatore CSV personalizzato (§) invece di uno standard, per evitare conflitti con virgole nei campi testuali; non è tuttavia gestito l'escaping di eventuali caratteri § presenti nei dati stessi.
+- Nessuna integrazione con sistemi di pagamento reali: il totale della prenotazione viene calcolato ma non gestito un pagamento effettivo.
+
+14. Sitografia / Bibliografia
+
+- Oracle, Java SE Documentation, Online: https://docs.oracle.com/en/java/javase/
+- Oracle, How to Write Doc Comments for the Javadoc Tool, Online: https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html
+- jBCrypt, libreria per l'hashing sicuro delle password, Online: https://www.mindrot.org/projects/jBCrypt/
+- Oracle, The Java Tutorials - Generics, Online: https://docs.oracle.com/javase/tutorial/java/generics/
+- Oracle, java.util.function.Function - Java Platform SE Documentation, Online: https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Function.html
