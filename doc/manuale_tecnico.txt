@@ -56,42 +56,46 @@ Le classi sono inserite nel package cinemax.
     la funzione di conversione da e verso il formato CSV (ad esempio Proiezione::fromCSV e Proiezione::toCSV). Questa scelta evita di duplicare codice simile per ogni entità del progetto e rende il FileManager 
     riutilizzabile anche per le entità aggiunte successivamente (Utente, Prenotazione).
 
+    La logica principale del progetto è stata quella di avere più indipendenza e astrazione possibile tra i ruoli e le classi scritte, così da non doversi preoccupare della struttura di ogni funzionalità usata.
+
 3.Scelte algoritmiche
 
-    Per leggere le righe del file CSV non abbiamo potuto usare semplicemente 
-    il metodo split(","), perché alcuni campi (come il titolo del film) sono 
-    racchiusi tra virgolette e potrebbero contenere una virgola al loro 
-    interno. Usando split(",") in modo diretto, una virgola dentro un titolo 
-    avrebbe spezzato il campo in due pezzi sbagliati, rovinando anche tutti 
-    i campi successivi della riga.
+    Come carattere separatore per i CSV è stato scelto di usare "§", in quanto carattere poco comune, così da ridurre il rischio
+    che, usando un carattere come la virgola o il punto e virgola, l'utente possa inserire informazioni che "romperebbero" il csv.
+    Facendo ciò abbiamo quindi evitato di introdurre logiche di splitting di record avanzate.
+    La soluzione presenta comunque una percentuale di rischio ma è considerata molto bassa.
 
-    Per risolvere questo problema abbiamo scritto un metodo (splitCSV) che 
-    scorre la riga carattere per carattere, tenendo traccia di quando ci si 
-    trova dentro una coppia di virgolette. Quando ci si trova dentro le 
-    virgolette, una virgola incontrata non viene considerata un separatore 
-    valido, e viene semplicemente aggiunta al campo che si sta costruendo.
+    La creazione del CSV e la sua deserializzazione sono definite da 3 metodi presenti in ogni classe considerata serializzabile:
+    -fromCSV: a partire da un record csv esegue uno split e ritorna l'oggetto desiderato se il parsing va a buon fine
+    -toCSV: riordina i campi dell'oggetto separandoli tramite carattere separatore
+    -header: ritorna la riga di intestazione per i CSV
 
-Per la ricerca degli elementi all’interno delle liste vengono utilizzati principalmente gli Stream di Java, con operazioni come filter(), findFirst() e toList().
-Ad esempio, per cercare una proiezione viene controllato l’ID:
-return this.pProiezioni.stream()
-        .filter(proiezione -> proiezione.getIdProiezione() == id)
-        .findFirst()
-        .orElse(null);
-Per mostrare le proiezioni disponibili vengono invece filtrate quelle future e ordinate in base alla data e all’ora:
-List<Proiezione> proiezioniFuture = this.pProiezioni.stream()
-        .filter(it -> it.getDataOraProiezione().isAfter(LocalDateTime.now()))
-        .sorted(Comparator.comparing(Proiezione::getDataOraProiezione))
-        .toList();
-Per controllare che due proiezioni non si sovrappongano viene calcolato l’orario di fine di ogni proiezione aggiungendo la durata del film all’orario di inizio. Se gli intervalli temporali si sovrappongono, la nuova proiezione non viene inserita.
-Per la gestione dei posti viene calcolato il numero di posti già occupati sommando i posti delle prenotazioni associate alla stessa proiezione. La capienza massima del cinema è di 200 posti.
-Per le password è stato utilizzato BCrypt, in modo da non salvarle direttamente in chiaro nei file.
+    Abbiamo inoltre introdotto una logica alquanto banale di log system. Ciò ci ha permesso di poter riconoscere al volo eventuali 
+    errori progettuali così da corregerli senza ridurre ulteriormente l'efficienza dello sviluppo
+
+    Per la ricerca degli elementi all’interno delle liste vengono utilizzati principalmente gli Stream di Java, con operazioni come filter(), findFirst() e toList().
+    Ad esempio, per cercare una proiezione viene controllato l’ID:
+    return this.pProiezioni.stream()
+            .filter(proiezione -> proiezione.getIdProiezione() == id)
+            .findFirst()
+            .orElse(null);
+    Per mostrare le proiezioni disponibili vengono invece filtrate quelle future e ordinate in base alla data e all’ora:
+    List<Proiezione> proiezioniFuture = this.pProiezioni.stream()
+            .filter(it -> it.getDataOraProiezione().isAfter(LocalDateTime.now()))
+            .sorted(Comparator.comparing(Proiezione::getDataOraProiezione))
+            .toList();
+    Per controllare che due proiezioni non si sovrappongano viene calcolato l’orario di fine di ogni proiezione aggiungendo la durata del film all’orario di inizio. Se gli intervalli temporali si sovrappongono, la nuova proiezione non viene inserita.
+    Per la gestione dei posti viene calcolato il numero di posti già occupati sommando i posti delle prenotazioni associate alla stessa proiezione. La capienza massima del cinema è di 200 posti.
+    Per le password è stato utilizzato BCrypt, che è una libreria che si occupa di cifratura e decifratura in maniera molto efficace, in modo da non salvarle direttamente in chiaro nei file.
+
+    Qualsiasi dato viene inoltre ordinato per il suo id numerico, così da fornire comfort visivo all'utente finale durante la visualizzazione dei dati stessi.
 
 
 4. Formato dei file e loro gestione
 
     I dati del programma vengono salvati in file CSV nella cartella data.
     La gestione dei file è affidata alla classe FileManager, mentre ogni classe che rappresenta un dato fornisce i metodi necessari per convertire i propri oggetti nel formato CSV.
-    Come separatore dei campi è stato scelto il carattere §, definito nella classe Costanti:
+    Come separatore dei campi è stato scelto il carattere §, definito nella classe Costanti, (come precedentemente anticipato):
     public static final String SEPARATORE_CSV = "§";
     La classe Proiezione, ad esempio, utilizza il metodo toCSV() per trasformare un oggetto in una riga del file:
     return String.join(Costanti.SEPARATORE_CSV,
@@ -110,7 +114,7 @@ Per le password è stato utilizzato BCrypt, in modo da non salvarle direttamente
     proiezioni.csv, per le proiezioni;
     prenotazioni.csv, per le prenotazioni.
     Il FileManager viene inizializzato con il percorso:
-    this.pFileManager = new FileManager("../../data");
+    this.pFileManager = new FileManager("data");
 
      Il percorso di ogni file viene costruito unendo il nome della cartella 
     dati (dataDirectory, es. "data") con il nome del file specifico (es. 
@@ -130,6 +134,8 @@ Per le password è stato utilizzato BCrypt, in modo da non salvarle direttamente
     Per contenere più proiezioni insieme abbiamo usato una List<Proiezione>, una lista che può contenere 
     un numero variabile di oggetti Proiezione.
 
+    A grandi linee lo stesso discorso vale anche per utenti e prenotazioni.
+
 6. Gestione degli utenti
 
     La classe Utente contiene i dati personali dell’utente, le credenziali e il ruolo.
@@ -145,30 +151,30 @@ Per le password è stato utilizzato BCrypt, in modo da non salvarle direttamente
 
 7. Gestione delle proiezioni
 
-La classe Proiezione contiene le informazioni relative alla proiezione, tra cui:
-ID della proiezione;
-data e ora;
-titolo del film;
-genere;
-regista;
-anno;
-durata;
-età minima;
-prezzo del biglietto.
-La classe contiene anche un costruttore di copia:
-public Proiezione(Proiezione altraProiezione) {
-    this.idProiezione = altraProiezione.idProiezione;
-    this.dataOraProiezione = altraProiezione.dataOraProiezione;
-    this.titoloFilm = altraProiezione.titoloFilm;
-    this.genere = altraProiezione.genere;
-    this.regista = altraProiezione.regista;
-    this.anno = altraProiezione.anno;
-    this.durataMinuti = altraProiezione.durataMinuti;
-    this.etaMinima = altraProiezione.etaMinima;
-    this.prezzoBiglietto = altraProiezione.prezzoBiglietto;
-}
-Questo costruttore viene utilizzato quando si vuole creare una copia della proiezione prima di applicare delle modifiche.
-L’ID viene mantenuto all’interno dell’oggetto tramite idProiezione e viene utilizzato per collegare una proiezione alle relative prenotazioni.
+    La classe Proiezione contiene le informazioni relative alla proiezione, tra cui:
+    ID della proiezione;
+    data e ora;
+    titolo del film;
+    genere;
+    regista;
+    anno;
+    durata;
+    età minima;
+    prezzo del biglietto.
+    La classe contiene anche un costruttore di copia:
+    public Proiezione(Proiezione altraProiezione) {
+        this.idProiezione = altraProiezione.idProiezione;
+        this.dataOraProiezione = altraProiezione.dataOraProiezione;
+        this.titoloFilm = altraProiezione.titoloFilm;
+        this.genere = altraProiezione.genere;
+        this.regista = altraProiezione.regista;
+        this.anno = altraProiezione.anno;
+        this.durataMinuti = altraProiezione.durataMinuti;
+        this.etaMinima = altraProiezione.etaMinima;
+        this.prezzoBiglietto = altraProiezione.prezzoBiglietto;
+    }
+    Questo costruttore viene utilizzato quando si vuole creare una copia della proiezione prima di applicare delle modifiche.
+    L’ID viene mantenuto all’interno dell’oggetto tramite idProiezione e viene utilizzato per collegare una proiezione alle relative prenotazioni.
 
 
 8. Gestione delle prenotazioni
@@ -188,6 +194,8 @@ L’ID viene mantenuto all’interno dell’oggetto tramite idProiezione e viene
     Questi metodi controllano che l’utente inserisca valori corretti e, quando necessario, che siano compresi in un determinato intervallo.
     Per le date viene utilizzato LocalDate o LocalDateTime insieme a DateTimeFormatter. In caso di formato non valido viene gestita la DateTimeParseException.
     Durante il caricamento dei file CSV vengono inoltre controllati il numero dei campi e la validità dei dati.
+
+    Questa soluzione consente di avere dei controlli consistenti e robusti senza ridondanza di codice o bug strutturali.
 
 
 10. Pattern e principi utilizzati
